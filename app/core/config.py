@@ -32,6 +32,10 @@ class Settings(BaseSettings):
         description="Synchronous database URL for Alembic",
     )
 
+    REDIS_URL: str = Field(
+        default="redis://localhost:6379/0", description="Redis connection URL"
+    )
+
     # Security settings
     SECRET_KEY: str = Field(
         default="dev-secret-key-change-in-production", description="Secret key"
