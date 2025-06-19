@@ -75,7 +75,7 @@ class ValidationException(APIException):
         )
 
 
-class UnauthorizedException(APIException):
+class AuthorizationException(APIException):
     """
     Exception raised for unauthorized access.
     """
@@ -131,7 +131,7 @@ class ConflictError(APIException):
         )
 
 
-class RateLimitError(APIException):
+class RateLimitException(APIException):
     """Rate limit exceeded exception"""
 
     def __init__(self, message: str = "Rate limit exceeded"):
