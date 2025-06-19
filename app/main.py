@@ -1,6 +1,7 @@
 import logging
 from contextlib import asynccontextmanager
 from app import __version__
+from app.api import api_router
 from app.core.config import settings
 import uvicorn
 from fastapi import FastAPI
@@ -19,12 +20,12 @@ def print_banner() -> None:
 
     banner = f"""
     \033[38;5;208m
-    ███████╗███╗   ███╗██╗████████╗██╗  ██╗██╗   ██╗
-    ██╔════╝████╗ ████║██║╚══██╔══╝██║  ██║╚██╗ ██╔╝
-    ███████╗██╔████╔██║██║   ██║   ███████║ ╚████╔╝ 
-    ╚════██║██║╚██╔╝██║██║   ██║   ██╔══██║  ╚██╔╝  
-    ███████║██║ ╚═╝ ██║██║   ██║   ██║  ██║   ██║   
-    ╚══════╝╚═╝     ╚═╝╚═╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝   
+      ███████╗███╗   ███╗██╗████████╗██╗  ██╗██╗   ██╗
+      ██╔════╝████╗ ████║██║╚══██╔══╝██║  ██║╚██╗ ██╔╝
+      ███████╗██╔████╔██║██║   ██║   ███████║ ╚████╔╝ 
+      ╚════██║██║╚██╔╝██║██║   ██║   ██╔══██║  ╚██╔╝  
+      ███████║██║ ╚═╝ ██║██║   ██║   ██║  ██║   ██║   
+      ╚══════╝╚═╝     ╚═╝╚═╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝   
     \033[0m\033[38;5;244m
     ┌─────────────────────────────────────────────────┐
     │  \033[1mProject Management API\033[0m\033[38;5;244m                         │
@@ -82,20 +83,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Health check
-    @app.get("/health", tags=["Health"])
-    async def health_check():
-        """
-        Health check endpoint
-        """
-        return {
-            "status": "healthy",
-            "version": __version__,
-            "environment": settings.ENVIRONMENT,
-            "debug": settings.DEBUG,
-        }
-
-    return app
+    app.include_router(api_router)
 
 
 app = create_app()
