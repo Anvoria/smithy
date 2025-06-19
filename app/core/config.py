@@ -22,6 +22,16 @@ class Settings(BaseSettings):
     HOST: str = Field(default="0.0.0.0", description="Server host")
     PORT: int = Field(default=8000, description="Server port")
 
+    # Database settings
+    DATABASE_URL: str = Field(
+        default="postgresql+asyncpg://smithy:smithy@localhost/smithy",
+        description="Database URL",
+    )
+    DATABASE_URL_SYNC: str = Field(
+        default="postgresql://smithy:smithy@localhost/smithy",
+        description="Synchronous database URL for Alembic",
+    )
+
     # Security settings
     SECRET_KEY: str = Field(
         default="dev-secret-key-change-in-production", description="Secret key"
