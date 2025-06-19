@@ -5,7 +5,7 @@ from typing import Optional, Dict, Any, Annotated
 from pydantic import BaseModel, EmailStr, Field, ConfigDict, field_validator
 
 from app.models.user import UserStatus, UserRole, LoginProvider
-from app.utils.passwords import validate_password_strength
+from app.core.security import PasswordManager
 
 
 # ==========================================
@@ -65,7 +65,7 @@ class UserCreate(UserBase):
             return v
 
         # Password strength validation
-        is_password_strong = validate_password_strength(v)
+        is_password_strong = PasswordManager.validate_password_strength(v)
         if not is_password_strong:
             raise ValueError(
                 "Password must contain at least one uppercase letter, "
@@ -108,7 +108,7 @@ class UserPasswordUpdate(BaseModel):
     @classmethod
     def validate_new_password(cls, v: str) -> str:
         """Validate new password requirements"""
-        is_password_strong = validate_password_strength(v)
+        is_password_strong = PasswordManager.validate_password_strength(v)
         if not is_password_strong:
             raise ValueError(
                 "Password must contain at least one uppercase letter, "
@@ -268,7 +268,7 @@ class PasswordResetConfirm(BaseModel):
     @classmethod
     def validate_new_password(cls, v: str) -> str:
         """Validate new password requirements"""
-        is_password_strong = validate_password_strength(v)
+        is_password_strong = PasswordManager.validate_password_strength(v)
         if not is_password_strong:
             raise ValueError(
                 "Password must contain at least one uppercase letter, "
