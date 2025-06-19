@@ -171,6 +171,24 @@ class User(Base):
         String(255), nullable=True, index=True, comment="External system user ID"
     )
 
+    # Activity tracking
+    last_login_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        comment="Last successful login timestamp",
+    )
+
+    last_activity_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        index=True,
+        comment="Last activity timestamp",
+    )
+
+    login_count: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False, comment="Total login count"
+    )
+
     # Verification & Recovery
     email_verification_token: Mapped[Optional[str]] = mapped_column(
         String(255), nullable=True, unique=True, comment="Email verification token"
@@ -196,13 +214,15 @@ class User(Base):
     __table_args__ = (
         # Indexes for performance
         Index("idx_user_email_status", "email", "status"),
+        Index("idx_user_last_activity", "last_activity_at"),
         Index("idx_user_created_status", "created_at", "status"),
         Index("idx_user_role_status", "role", "status"),
         # Check constraints
         CheckConstraint(
-            "email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'",
+            r"email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'",
             name="valid_email_format",
         ),
+        CheckConstraint("login_count >= 0", name="non_negative_login_count"),
         CheckConstraint(
             "LENGTH(username) >= 3 OR username IS NULL", name="username_min_length"
         ),
