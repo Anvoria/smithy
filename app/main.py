@@ -4,10 +4,18 @@ from app import __version__
 from app.api import api_router
 from app.core.config import settings
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.exceptions import (
+    APIException,
+    api_exception_handler,
+    validation_exception_handler,
+    http_exception_handler,
+    generic_exception_handler,
+)
 from app.core.logger import setup_logging
+from pydantic import ValidationError
 
 
 def print_banner() -> None:
@@ -83,7 +91,15 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    # Exception handlers
+    app.add_exception_handler(APIException, api_exception_handler)
+    app.add_exception_handler(ValidationError, validation_exception_handler)
+    app.add_exception_handler(HTTPException, http_exception_handler)
+    app.add_exception_handler(Exception, generic_exception_handler)
+
     app.include_router(api_router)
+
+    return app
 
 
 app = create_app()
