@@ -23,6 +23,20 @@ services:
     networks:
       - smithy_network
 
+  redis:
+    image: redis:7-alpine
+    container_name: smithy_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - smithy_network
+
   # Optional
   pgadmin:
     image: dpage/pgadmin4:latest
