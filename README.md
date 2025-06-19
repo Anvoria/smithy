@@ -13,11 +13,17 @@ A minimalist, backend-focused project and task management platform built for dev
 
 ## ✨ Features
 
--
+- **Fast and lightweight** - Built with FastAPI and async SQLAlchemy for high performance.
+- **Developer-first** - Focused on providing a solid API for building custom tools.
+- **Secure** - JWT authentication for secure access.
+- **Modular architecture** - Easily extendable with plugins and custom endpoints.
+- **Scalable** - PostgreSQL backend with Alembic migrations for schema management.
 
 ### Core Functionality
 
--
+- User management (registration, login, profile)
+- Project organization (create, update, delete projects)
+- Task tracking (full CRUD with status, priority, due dates)
 
 ---
 
@@ -55,14 +61,14 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ### 🧱 Foundation
 
-- [ ] Project scaffold (folder structure, FastAPI app)
-- [ ] Environment setup (.env, config loader)
+- [x] Project scaffold (folder structure, FastAPI app)
+- [x] Environment setup (.env, config loader)
 - [ ] Base Dockerfile + docker-compose
 - [ ] SQLAlchemy models (User, Project, Task)
-- [ ] Alembic migrations
+- [x] Alembic migrations
 - [ ] JWT authentication (access and refresh)
 - [ ] Initial tests (pytest + coverage)
-- [ ] Basic logging + error handling
+- [x] Basic logging + error handling
 
 ### 📡 API Layer
 
@@ -71,7 +77,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - [ ] Project CRUD
 - [ ] Task CRUD
 - [ ] Filtering & pagination
-- [ ] Basic OpenAPI docs
+- [x] Basic OpenAPI docs
 
 ### 📦 Later / Feature Plans
 
