@@ -1,6 +1,7 @@
 from typing import List
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings
+from time import time
 
 
 class Settings(BaseSettings):
@@ -88,4 +89,5 @@ class Settings(BaseSettings):
 
 
 # Global settings instance
+startup_time = time()
 settings = Settings()

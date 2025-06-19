@@ -1,9 +1,27 @@
+from typing import Dict, Any
+
 from fastapi import APIRouter
-from app.core.config import settings
+from app.core.config import settings, startup_time
 import psutil
 from datetime import datetime, UTC
+from time import time
 
 router = APIRouter(prefix="/health", tags=["Health"])
+
+
+def calculate_uptime() -> Dict[str, Any]:
+    """
+    Calculate the uptime of the application since startup.
+    """
+    uptime_seconds = time() - startup_time
+    hours = int(uptime_seconds // 3600)
+    minutes = int((uptime_seconds % 3600) // 60)
+    seconds = int(uptime_seconds % 60)
+
+    return {
+        "uptime_seconds": round(uptime_seconds, 2),
+        "uptime_formatted": f"{hours}h {minutes}m {seconds}s",
+    }
 
 
 @router.get("/", tags=["Health"])
@@ -16,6 +34,7 @@ async def health_check():
         "version": settings.VERSION,
         "timestamp": datetime.now(UTC).isoformat(),
         "environment": settings.ENVIRONMENT,
+        **calculate_uptime(),
     }
 
 
@@ -37,4 +56,5 @@ async def health_check_details():
         "memory_used": memory_info.used,
         "memory_free": memory_info.free,
         "memory_percent": memory_info.percent,
+        **calculate_uptime(),
     }
