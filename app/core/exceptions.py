@@ -75,12 +75,12 @@ class ValidationException(APIException):
         )
 
 
-class AuthorizationException(APIException):
+class AuthenticationException(APIException):
     """
-    Exception raised for unauthorized access.
+    Exception raised for authentication errors.
     """
 
-    def __init__(self, message: str = "Unauthorized access"):
+    def __init__(self, message: str = "Authentication required"):
         super().__init__(
             message=message,
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -217,7 +217,7 @@ async def generic_exception_handler(request: Request, exc: Exception) -> JSONRes
         content=format_error_response(
             message="Internal server error",
             code=ErrorCode.INTERNAL_SERVER_ERROR,
-            details={"type": type(exc).__name__} if hasattr(exc, "__name__") else {},
+            details={"type": type(exc).__name__},
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         ),
     )
