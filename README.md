@@ -66,13 +66,13 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - [ ] Base Dockerfile + docker-compose
 - [ ] SQLAlchemy models (User, Project, Task)
 - [x] Alembic migrations
-- [ ] JWT authentication (access and refresh)
+- [x] JWT authentication (access and refresh)
 - [ ] Initial tests (pytest + coverage)
 - [x] Basic logging + error handling
 
 ### 📡 API Layer
 
-- [ ] Auth endpoints (register, login, refresh)
+- [x] Auth endpoints (register, login, refresh)
 - [ ] User CRUD
 - [ ] Project CRUD
 - [ ] Task CRUD
