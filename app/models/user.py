@@ -6,6 +6,7 @@ from sqlalchemy import String, Boolean, DateTime, Text, Integer, Index, CheckCon
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
+from app.core.utils import AvatarUtils
 from app.db.base import Base
 
 
@@ -209,6 +210,11 @@ class User(Base):
         nullable=True,
         comment="Password reset token expiration",
     )
+
+    @property
+    def avatar_url(self) -> Optional[str]:
+        """Get user's avatar URL"""
+        return AvatarUtils.get_gravatar_url(self.email, size=200, default="identicon")
 
     # Database Constraints
     __table_args__ = (

@@ -31,7 +31,6 @@ class UserBase(BaseModel):
         Optional[str], Field(default=None, max_length=191, description="Display name")
     ]
     bio: Optional[str] = Field(None, description="User biography")
-    avatar_url: Optional[str] = Field(None, description="Profile avatar URL")
     timezone: Optional[str] = Field("UTC", description="User timezone")
     locale: Optional[str] = Field("en_US", description="User locale")
 
@@ -91,7 +90,6 @@ class UserUpdate(BaseModel):
         Optional[str], Field(default=None, max_length=191, description="Display name")
     ]
     bio: Optional[str] = None
-    avatar_url: Optional[str] = None
     timezone: Optional[str] = None
     locale: Optional[str] = None
 

@@ -135,6 +135,26 @@ class TokenManager:
         return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
     @staticmethod
+    def decode_token(token: str) -> Dict[str, Any]:
+        """
+        Decode a JWT token and verify its signature.
+        :param token:
+        :return: Decoded token payload as a dictionary.
+        """
+        try:
+            return jwt.decode(
+                token,
+                settings.SECRET_KEY,
+                algorithms=[settings.ALGORITHM],
+                options={"verify_exp": True},
+            )
+        except JWTError as e:
+            msg = str(e)
+            if "Signature has expired" in msg:
+                raise ValueError("Token has expired")
+            raise ValueError(f"Invalid token: {msg}")
+
+    @staticmethod
     def get_token_jti(token: str) -> Optional[str]:
         """
         Extract the JWT ID (JTI) from a JWT token without verifying its signature.
