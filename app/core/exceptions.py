@@ -210,8 +210,40 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
     )
 
 
+async def not_found_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    """
+    Handle 404 Not Found errors with consistent format.
+    """
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content=format_error_response(
+            message="The requested resource was not found",
+            code=ErrorCode.NOT_FOUND,
+            status_code=status.HTTP_404_NOT_FOUND,
+        ),
+    )
+
+
+async def method_not_allowed_exception_handler(
+    request: Request, exc: Exception
+) -> JSONResponse:
+    """
+    Handle 405 Method Not Allowed errors with consistent format.
+    """
+    return JSONResponse(
+        status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+        content=format_error_response(
+            message="The requested HTTP method is not allowed for this endpoint",
+            code=ErrorCode.HTTP_ERROR,
+            status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+        ),
+    )
+
+
 async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    """Handle unexpected exceptions"""
+    """
+    Handle unexpected exceptions
+    """
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content=format_error_response(

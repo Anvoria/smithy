@@ -2,6 +2,8 @@ from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
+from app.models.user import UserRole
+
 
 class LoginRequest(BaseModel):
     """User login request"""
@@ -51,7 +53,7 @@ class AuthUser(BaseModel):
     id: str
     email: str
     username: Optional[str]
-    role: str
+    role: UserRole
     is_verified: bool
     is_active: bool
     full_name: Optional[str]

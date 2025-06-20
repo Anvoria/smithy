@@ -12,10 +12,13 @@ from app.core.exceptions import (
     api_exception_handler,
     validation_exception_handler,
     http_exception_handler,
+    not_found_exception_handler,
+    method_not_allowed_exception_handler,
     generic_exception_handler,
 )
 from app.core.logger import setup_logging
 from pydantic import ValidationError
+from app.db.redis_client import redis_client
 
 
 def print_banner() -> None:
@@ -62,8 +65,13 @@ async def lifespan(app: FastAPI):
     logger.info(f"📍 Environment: {settings.ENVIRONMENT}")
     logger.info(f"🎯 Debug mode: {settings.DEBUG}")
 
+    # Connect to Redis
+    await redis_client.connect()
+
     yield
 
+    # Cleanup on shutdown
+    await redis_client.disconnect()
     logger.info("⚡ Smithy API shutting down...")
 
 
@@ -95,6 +103,8 @@ def create_app() -> FastAPI:
     app.add_exception_handler(APIException, api_exception_handler)
     app.add_exception_handler(ValidationError, validation_exception_handler)
     app.add_exception_handler(HTTPException, http_exception_handler)
+    app.add_exception_handler(404, not_found_exception_handler)
+    app.add_exception_handler(405, method_not_allowed_exception_handler)
     app.add_exception_handler(Exception, generic_exception_handler)
 
     app.include_router(api_router)

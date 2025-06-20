@@ -55,7 +55,6 @@ class AuthService:
             last_name=user_data.last_name,
             password_hash=hashed_password,
             status=UserStatus.PENDING_VERIFICATION,
-            is_active=True,
         )
 
         self.db.add(new_user)
@@ -187,6 +186,7 @@ class AuthService:
         )
 
         # Create tokens
+        print(type(user.role), user.role)
         access_token = self.token_manager.create_access_token(
             subject=user.email,
             user_id=str(user.id),

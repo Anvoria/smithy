@@ -1,8 +1,16 @@
 from datetime import datetime, UTC
 from typing import Optional
 from enum import Enum
-
-from sqlalchemy import String, Boolean, DateTime, Text, Integer, Index, CheckConstraint
+from sqlalchemy import (
+    String,
+    Boolean,
+    DateTime,
+    Text,
+    Integer,
+    Index,
+    CheckConstraint,
+    Enum as SQLAlchemyEnum,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -120,7 +128,7 @@ class User(Base):
     )
 
     role: Mapped[UserRole] = mapped_column(
-        String(20),
+        SQLAlchemyEnum(UserRole, name="userrole"),
         default=UserRole.USER,
         nullable=False,
         comment="Role of the user for access control",
@@ -131,13 +139,6 @@ class User(Base):
         default=False,
         nullable=False,
         comment="Indicates if the user's email is verified",
-    )
-
-    is_active: Mapped[bool] = mapped_column(
-        Boolean,
-        default=True,
-        nullable=False,
-        comment="Indicates if the user account is active",
     )
 
     is_superuser: Mapped[bool] = mapped_column(
@@ -215,6 +216,11 @@ class User(Base):
     def avatar_url(self) -> Optional[str]:
         """Get user's avatar URL"""
         return AvatarUtils.get_gravatar_url(self.email, size=200, default="identicon")
+
+    @property
+    def is_active(self) -> bool:
+        """Check if user account is active"""
+        return self.status == UserStatus.ACTIVE
 
     # Database Constraints
     __table_args__ = (

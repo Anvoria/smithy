@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(
         default=30, description="Access token expiry"
     )
+    REFRESH_TOKEN_EXPIRE_DAYS: int = Field(
+        default=7, description="Refresh token expiry in days"
+    )
 
     # CORS settings
     CORS_ORIGINS: List[str] = Field(
