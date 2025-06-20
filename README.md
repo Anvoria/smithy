@@ -8,6 +8,8 @@ A minimalist, backend-focused project and task management platform built for dev
 [![Python 3.13+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.114+-00a393.svg)](https://fastapi.tiangolo.com)
 [![Linted with Ruff](https://img.shields.io/badge/linting-ruff-blue)](https://docs.astral.sh/ruff/)
+[![CI](https://github.com/Anvoria/smithy-backend/actions/workflows/ci.yml/badge.svg)](https://github.com/Anvoria/smithy-backend/actions/workflows/ci.yml)
+
 
 ---
 
@@ -70,7 +72,7 @@ We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) 
 
 - [x] Project scaffold (folder structure, FastAPI app)
 - [x] Environment setup (.env, config loader)
-- [ ] Base Dockerfile + docker-compose
+- [x] Base Dockerfile + docker-compose
 - [ ] SQLAlchemy models (User, Project, Task)
 - [x] Alembic migrations
 - [x] JWT authentication (access and refresh)
@@ -80,7 +82,7 @@ We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) 
 ### 📡 API Layer
 
 - [x] Auth endpoints (register, login, refresh)
-- [ ] User CRUD
+- [x] User CRUD
 - [ ] Project CRUD
 - [ ] Task CRUD
 - [ ] Filtering & pagination
