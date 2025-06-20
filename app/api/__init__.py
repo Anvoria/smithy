@@ -7,9 +7,21 @@ from typing import List
 
 logger = logging.getLogger(__name__)
 
-api_router = APIRouter(prefix="/api/v1")
+api_router = APIRouter(prefix="/v1")
 BASE_PACKAGE = "app.api"
 BASE_PATH = pathlib.Path(__file__).parent
+
+routers = []  # List to hold dynamically loaded routers
+
+_routers_loaded = False
+
+
+def init_routers():
+    global _routers_loaded
+    global routers
+    if not _routers_loaded:
+        routers = include_routers_from_package(BASE_PACKAGE, BASE_PATH)
+        _routers_loaded = True
 
 
 def include_routers_from_package(package: str, path: pathlib.Path) -> List[str]:
@@ -66,7 +78,4 @@ def include_routers_from_package(package: str, path: pathlib.Path) -> List[str]:
     return loaded_routers
 
 
-# Load all routers
-loaded_modules = include_routers_from_package(BASE_PACKAGE, BASE_PATH)
-
-__all__ = ["api_router", "loaded_modules"]
+__all__ = ["api_router", "init_routers"]

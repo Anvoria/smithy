@@ -133,7 +133,6 @@ class UserService:
             .where(User.id == user_id)
             .values(
                 password_hash=new_password_hash,
-                password_changed_at=datetime.now(UTC),
                 updated_at=datetime.now(UTC),
             )
         )

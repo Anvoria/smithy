@@ -180,7 +180,6 @@ class UserAdmin(UserProfile):
     is_superuser: bool
     email_verification_expires: Optional[datetime]
     password_reset_expires: Optional[datetime]
-    password_changed_at: Optional[datetime]
     external_id: Optional[str]
     oauth_accounts: Optional[Dict[str, Any]]
 

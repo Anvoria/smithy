@@ -1,7 +1,7 @@
 import logging
 from contextlib import asynccontextmanager
 from app import __version__
-from app.api import api_router
+from app.api import api_router, init_routers, routers
 from app.core.config import settings
 import uvicorn
 from fastapi import FastAPI, HTTPException
@@ -20,6 +20,8 @@ from app.core.logger import setup_logging
 from pydantic import ValidationError
 from app.db.redis_client import redis_client
 
+setup_logging()
+
 
 def print_banner() -> None:
     """
@@ -28,6 +30,7 @@ def print_banner() -> None:
     """
     port = settings.PORT
     debug = "\033[38;5;226mON\033[0m" if settings.DEBUG else "\033[38;5;196mOFF\033[0m"
+    router_count = len(routers)
 
     banner = f"""
     \033[38;5;208m
@@ -45,6 +48,7 @@ def print_banner() -> None:
     │  \033[38;5;46m🔨 Version:\033[0m v{__version__:<30}\033[38;5;244m    │
     │  \033[38;5;46m🌐 Port:\033[0m    {port:<29}      \033[38;5;244m│
     │  \033[38;5;46m🐛 Debug:\033[0m   {debug:<29}      \033[38;5;244m               │
+    │  \033[38;5;46m📚 Routers:\033[0m {router_count:<29}      \033[38;5;244m│
     └─────────────────────────────────────────────────┘
     \033[0m
     """
@@ -57,7 +61,6 @@ async def lifespan(app: FastAPI):
     Application lifespan manager
     :param app: FastAPI application
     """
-    setup_logging()
     logger = logging.getLogger(__name__)
 
     print_banner()
@@ -89,7 +92,6 @@ def create_app() -> FastAPI:
         redoc_url="/redoc" if settings.DOCS_ENABLED else None,
         lifespan=lifespan,
     )
-
     # CORS
     app.add_middleware(
         CORSMiddleware,
@@ -107,6 +109,7 @@ def create_app() -> FastAPI:
     app.add_exception_handler(405, method_not_allowed_exception_handler)
     app.add_exception_handler(Exception, generic_exception_handler)
 
+    init_routers()
     app.include_router(api_router)
 
     return app
