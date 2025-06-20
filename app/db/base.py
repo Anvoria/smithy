@@ -21,7 +21,13 @@ class Base(DeclarativeBase):
         Converts CamelCase to snake_case.
         """
         name = cls.__name__
-        return re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
+        snake_case = re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
+        if snake_case.endswith("y") and snake_case[-2] not in "aeiou":
+            return snake_case[:-1] + "ies"
+        elif snake_case.endswith(("s", "x", "z", "ch", "sh")):
+            return snake_case + "es"
+        else:
+            return snake_case + "s"
 
     # Primary key ID field
     id: Mapped[uuid.UUID] = mapped_column(
