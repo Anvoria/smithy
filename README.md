@@ -31,13 +31,26 @@ A minimalist, backend-focused project and task management platform built for dev
 
 ### Prerequisites
 
--
+- Python 3.13+
+- Docker & Docker Compose
+- PostgreSQL 15+ (if not using Docker)
 
 ### Quick Start
 
----
+```bash
+# Clone the repo
+git clone https://github.com/Anvoria/smithy-backend.git
+cd smithy-backend
 
-## 🏗️ Architecture
+# Copy environment variables
+cp .env.example .env
+
+# Start using Docker
+docker-compose up --build
+
+# Alembic migrations
+docker-compose exec smithy_backend alembic upgrade head
+```
 
 ---
 
@@ -47,13 +60,7 @@ A minimalist, backend-focused project and task management platform built for dev
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing-feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) for details on how to get started.
 
 ---
 

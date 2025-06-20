@@ -1,22 +1,20 @@
 version: '3.9'
 
 services:
-  smithy_backend:
+  api:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: smithy_backend
-    environment:
-      - SMITHY_ENV=production
-      - DATABASE_URL=postgresql+asyncpg://smithy:smithy@postgres:5432/smithy
-      - REDIS_URL=redis://redis:6379/0
+      dockerfile: Dockerfile.dev
+    container_name: smithy_api_dev
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
     env_file:
       - .env
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - postgres
+      - redis
     networks:
       - smithy_network
 
@@ -29,8 +27,11 @@ services:
       POSTGRES_USER: smithy
       POSTGRES_PASSWORD: smithy
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U smithy -d smithy"]
       interval: 10s
@@ -43,6 +44,8 @@ services:
     image: redis:7-alpine
     container_name: smithy_redis
     restart: unless-stopped
+    ports:
+      - "6379:6379"
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
@@ -51,9 +54,30 @@ services:
     networks:
       - smithy_network
 
+  # Optional
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: smithy_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@smithy.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - smithy_network
+
 volumes:
   postgres_data:
+    driver: local
   pgadmin_data:
+    driver: local
 
 networks:
   smithy_network:

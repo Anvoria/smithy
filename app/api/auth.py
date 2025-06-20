@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.auth import get_current_user
 from app.db.client import get_db
 from app.schemas.auth import (
     LoginRequest,
@@ -13,7 +12,6 @@ from app.schemas.auth import (
     TokenResponse,
     RefreshTokenRequest,
     LogoutRequest,
-    AuthUser,
 )
 from app.services.auth_service import AuthService
 
@@ -101,15 +99,3 @@ async def logout(
     except Exception as e:
         logger.error(f"Logout error: {e}")
         return {"message": "Logged out"}
-
-
-@router.get("/me", response_model=AuthUser)
-async def get_current_user_info(
-    current_user: Annotated[AuthUser, Depends(get_current_user)],
-) -> AuthUser:
-    """
-    Get current authenticated user information.
-
-    Returns user profile data for the authenticated user.
-    """
-    return current_user
