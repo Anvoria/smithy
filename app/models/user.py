@@ -121,7 +121,7 @@ class User(Base):
 
     # Account status and roles
     status: Mapped[UserStatus] = mapped_column(
-        String(20),
+        SQLAlchemyEnum(UserStatus, native_enum=False),
         default=UserStatus.ACTIVE,
         nullable=False,
         comment="Current status of the user account",
@@ -220,7 +220,10 @@ class User(Base):
     @property
     def is_active(self) -> bool:
         """Check if user account is active"""
-        return self.status == UserStatus.ACTIVE
+        try:
+            return UserStatus(self.status.lower()) == UserStatus.ACTIVE
+        except ValueError:
+            return False
 
     # Database Constraints
     __table_args__ = (

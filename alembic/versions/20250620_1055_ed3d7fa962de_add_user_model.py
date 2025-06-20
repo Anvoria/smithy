@@ -1,8 +1,8 @@
 """add user model
 
-Revision ID: 44bce3bb9d28
+Revision ID: ed3d7fa962de
 Revises: d5aceb9f23b1
-Create Date: 2025-06-20 07:24:58.928355+00:00
+Create Date: 2025-06-20 10:55:19.996373+00:00
 
 🚧 SMITHY MIGRATION 🚧
 This file was automatically forged by Alembic.
@@ -16,7 +16,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = "44bce3bb9d28"
+revision: str = "ed3d7fa962de"
 down_revision: Union[str, Sequence[str], None] = "d5aceb9f23b1"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -86,7 +86,15 @@ def upgrade() -> None:
         ),
         sa.Column(
             "status",
-            sa.String(length=20),
+            sa.Enum(
+                "ACTIVE",
+                "INACTIVE",
+                "SUSPENDED",
+                "PENDING_VERIFICATION",
+                "ARCHIVED",
+                name="userstatus",
+                native_enum=False,
+            ),
             nullable=False,
             comment="Current status of the user account",
         ),
@@ -221,5 +229,6 @@ def downgrade() -> None:
     op.drop_index("idx_user_last_activity", table_name="user")
     op.drop_index("idx_user_email_status", table_name="user")
     op.drop_index("idx_user_created_status", table_name="user")
+    op.execute("DROP TYPE IF EXISTS userrole")
     op.drop_table("user")
     # ### end Alembic commands ###

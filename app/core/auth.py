@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.db.client import get_db
-from app.models.user import User, UserStatus
+from app.models.user import User, UserStatus, UserRole
 from app.schemas.auth import AuthUser
 from app.core.security import TokenManager
 from app.db.redis_client import redis_client
@@ -134,3 +134,29 @@ async def require_role(
         return current_user
 
     return role_checker
+
+
+async def require_admin(
+    current_user: AuthUser = Depends(get_current_active_user),
+) -> AuthUser:
+    """
+    Dependency to check if the current user is an admin.
+    :param current_user: Authenticated user from get_current_active_user dependency.
+    :return: AuthUser object if the user is an admin.
+    """
+    if current_user.role != UserRole.ADMIN:
+        raise ForbiddenException("Access denied for non-admin users")
+    return current_user
+
+
+async def require_moderator_or_admin(
+    current_user: AuthUser = Depends(get_current_active_user),
+) -> AuthUser:
+    """
+    Dependency to check if the current user is a moderator or admin.
+    :param current_user: Authenticated user from get_current_active_user dependency.
+    :return: AuthUser object if the user is a moderator or admin.
+    """
+    if current_user.role not in [UserRole.MODERATOR, UserRole.ADMIN]:
+        raise ForbiddenException("Access denied for non-moderators/admins")
+    return current_user
