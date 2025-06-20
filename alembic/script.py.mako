@@ -4,10 +4,13 @@ Revision ID: ${up_revision}
 Revises: ${down_revision | comma,n}
 Create Date: ${create_date}
 
+🚧 SMITHY MIGRATION 🚧
+This file was automatically forged by Alembic.
+Edit only if you know what you're doing.
 """
 from typing import Sequence, Union
 
-from alembic import op
+from alembic import op # type: ignore
 import sqlalchemy as sa
 ${imports if imports else ""}
 
