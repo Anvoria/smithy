@@ -79,7 +79,7 @@ jobs:
         path: bandit-report.json
 
     - name: Check dependencies for vulnerabilities
-      run: safety scan --full-report --output=json > safety-report.json
+      run: safety check --full-report --json > safety-report.json
       continue-on-error: true
 
     - name: Upload Safety report
