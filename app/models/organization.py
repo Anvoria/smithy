@@ -16,6 +16,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+from app.models.organization_member import MemberStatus
 
 
 class OrganizationType(str, Enum):
@@ -124,19 +125,6 @@ class Organization(Base):
         Integer, default=1, nullable=False, comment="Maximum storage in GB"
     )
 
-    # Usage Statistics
-    current_members: Mapped[int] = mapped_column(
-        Integer, default=0, nullable=False, comment="Current number of members"
-    )
-
-    current_projects: Mapped[int] = mapped_column(
-        Integer, default=0, nullable=False, comment="Current number of projects"
-    )
-
-    storage_used_mb: Mapped[int] = mapped_column(
-        Integer, default=0, nullable=False, comment="Storage used in MB"
-    )
-
     # Configuration & Settings
     settings: Mapped[Optional[dict]] = mapped_column(
         JSON, default=dict, nullable=True, comment="Organization configuration"
@@ -153,10 +141,6 @@ class Organization(Base):
     # Security
     require_2fa: Mapped[bool] = mapped_column(
         Boolean, default=False, nullable=False, comment="Require 2FA for all members"
-    )
-
-    ip_whitelist: Mapped[Optional[list]] = mapped_column(
-        JSON, nullable=True, comment="Allowed IP addresses"
     )
 
     public_projects: Mapped[bool] = mapped_column(
@@ -212,6 +196,22 @@ class Organization(Base):
         # Unique constraints
         UniqueConstraint("slug", name="unique_org_slug"),
     )
+
+    @property
+    def current_members(self) -> int:
+        """Count active members"""
+        return len([m for m in self.members if m.status == MemberStatus.ACTIVE])
+
+    @property
+    def current_projects(self) -> int:
+        """Count active projects"""
+        return len([p for p in self.projects if not p.deleted_at])
+
+    # TODO: Implement storage calculation based on actual project data
+    # https://github.com/Anvoria/smithy-backend/issues/5
+    @property
+    def storage_used_mb(self) -> int:
+        return 0
 
     @property
     def usage_stats(self) -> dict:

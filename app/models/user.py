@@ -1,5 +1,6 @@
+import uuid
 from datetime import datetime, UTC
-from typing import Optional
+from typing import Optional, List
 from enum import Enum
 from sqlalchemy import (
     String,
@@ -12,10 +13,11 @@ from sqlalchemy import (
     Enum as SQLAlchemyEnum,
 )
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.utils import AvatarUtils
 from app.db.base import Base
+from app.models.project import Project
 
 
 class UserStatus(str, Enum):
@@ -212,10 +214,33 @@ class User(Base):
         comment="Password reset token expiration",
     )
 
+    led_projects = relationship(
+        "Project", foreign_keys="Project.lead_id", back_populates="lead"
+    )
+    project_memberships = relationship(
+        "ProjectMember", foreign_keys="ProjectMember.user_id", back_populates="user"
+    )
+
     @property
     def avatar_url(self) -> Optional[str]:
         """Get user's avatar URL"""
         return AvatarUtils.get_gravatar_url(self.email, size=200, default="identicon")
+
+    @property
+    def assigned_projects(self) -> List["Project"]:
+        """Get all projects user is assigned to"""
+        return [membership.project for membership in self.project_memberships]
+
+    def get_role_in_project(self, project_id: uuid.UUID) -> Optional[str]:
+        """Get user's role in specific project"""
+        for membership in self.project_memberships:
+            if membership.project_id == project_id:
+                return membership.role.value
+        return None
+
+    def is_project_member(self, project_id: uuid.UUID) -> bool:
+        """Check if user is member of project"""
+        return any(m.project_id == project_id for m in self.project_memberships)
 
     @property
     def is_active(self) -> bool:
