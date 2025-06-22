@@ -45,7 +45,7 @@ class PaginationMeta(BaseModel):
     """Pagination metadata"""
 
     page: int = Field(..., ge=1)
-    size: int = Field(..., ge=1)
+    size: int = Field(..., ge=0)
     total: int = Field(..., ge=0)
     pages: int = Field(..., ge=0)
     has_next: bool = Field(...)
