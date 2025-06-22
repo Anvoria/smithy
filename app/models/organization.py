@@ -40,6 +40,16 @@ class OrganizationStatus(str, Enum):
     ARCHIVED = "archived"
 
 
+class OrganizationSize(str, Enum):
+    """Organization size categories"""
+
+    SMALL = "1-10"
+    MEDIUM = "11-50"
+    LARGE = "51-200"
+    ENTERPRISE = "201+"
+    SOLO = "solo"  # For freelancers or solo entrepreneurs
+
+
 class Organization(Base):
     """
     Organization model - central entity for multi-tenancy.
@@ -108,8 +118,11 @@ class Organization(Base):
         comment="Organization type",
     )
 
-    company_size: Mapped[Optional[str]] = mapped_column(
-        String(20), nullable=True, comment="Company size category (1-10, 11-50, etc.)"
+    company_size: Mapped[OrganizationSize] = mapped_column(
+        default=OrganizationSize.SOLO,
+        nullable=False,
+        index=True,
+        comment="Size of the organization",
     )
 
     # Limits & Quotas
