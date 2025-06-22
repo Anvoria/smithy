@@ -78,4 +78,4 @@ def include_routers_from_package(package: str, path: pathlib.Path) -> List[str]:
     return loaded_routers
 
 
-__all__ = ["api_router", "init_routers"]
+__all__ = ["api_router", "init_routers", "routers"]
