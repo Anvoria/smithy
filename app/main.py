@@ -1,5 +1,8 @@
 import logging
 from contextlib import asynccontextmanager
+
+from fastapi.exceptions import RequestValidationError
+
 from app import __version__
 from app.api import api_router, init_routers, routers
 from app.core.config import settings
@@ -10,12 +13,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.exceptions import (
     APIException,
     api_exception_handler,
-    validation_exception_handler,
     http_exception_handler,
     not_found_exception_handler,
     method_not_allowed_exception_handler,
     generic_exception_handler,
     forbidden_exception_handler,
+    request_validation_exception_handler,
+    pydantic_validation_exception_handler,
 )
 from app.core.logger import setup_logging
 from pydantic import ValidationError
@@ -125,7 +129,12 @@ def create_app() -> FastAPI:
 
     # Exception handlers
     app.add_exception_handler(APIException, api_exception_handler)
-    app.add_exception_handler(ValidationError, validation_exception_handler)
+    app.add_exception_handler(
+        RequestValidationError, request_validation_exception_handler
+    )  # <- FastAPI validation
+    app.add_exception_handler(
+        ValidationError, pydantic_validation_exception_handler
+    )  # <- Pydantic validation
     app.add_exception_handler(HTTPException, http_exception_handler)
     app.add_exception_handler(403, forbidden_exception_handler)
     app.add_exception_handler(404, not_found_exception_handler)

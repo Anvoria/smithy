@@ -4,7 +4,7 @@ from typing import Optional, Dict, Any
 from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from enum import Enum
-
+from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
 
 
@@ -20,6 +20,7 @@ class ErrorCode(str, Enum):
     BAD_REQUEST = "bad_request"
     CONFLICT = "conflict"
     HTTP_ERROR = "http_error"
+    VALIDATION_ERROR = "validation_error"
     RATE_LIMIT_EXCEEDED = "rate_limit_exceeded"
     INTERNAL_SERVER_ERROR = "internal_server_error"
 
@@ -175,12 +176,60 @@ async def api_exception_handler(request: Request, exc: APIException) -> JSONResp
     )
 
 
-async def validation_exception_handler(
+async def request_validation_exception_handler(
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
+    """
+    Global exception handler for FastAPI request validation errors.
+    Converts RequestValidationError to a standardized JSON response.
+    """
+    errors = []
+    for error in exc.errors():
+        # Build the field path from the error location
+        field_path = []
+        for loc in error["loc"]:
+            if loc != "body":
+                field_path.append(str(loc))
+
+        field = ".".join(field_path) if field_path else "unknown"
+
+        msg = error["msg"]
+        error_type = error["type"]
+
+        if error_type == "missing":
+            msg = "This field is required"
+        elif error_type == "string_too_short":
+            msg = f"Text is too short (minimum {error.get('ctx', {}).get('min_length', 'unknown')} characters)"
+        elif error_type == "string_too_long":
+            msg = f"Text is too long (maximum {error.get('ctx', {}).get('max_length', 'unknown')} characters)"
+        elif error_type == "value_error":
+            msg = error.get("ctx", {}).get("reason", msg)
+
+        errors.append(
+            {
+                "field": field,
+                "message": msg,
+                "type": error_type,
+                "input": error.get("input"),
+            }
+        )
+
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content=format_error_response(
+            message="Validation failed",
+            code=ErrorCode.VALIDATION_ERROR,
+            details={"errors": errors},
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        ),
+    )
+
+
+async def pydantic_validation_exception_handler(
     request: Request, exc: ValidationError
 ) -> JSONResponse:
     """
-    Global exception handler for validation errors.
-    Converts ValidationException to a standardized JSON response.
+    Global exception handler for Pydantic validation errors.
     """
     errors = []
     for error in exc.errors():
@@ -190,8 +239,8 @@ async def validation_exception_handler(
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content=format_error_response(
-            message="Validation failed",
-            code=ErrorCode.BAD_REQUEST,
+            message="Data validation failed",
+            code=ErrorCode.VALIDATION_ERROR,
             details={"errors": errors},
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         ),
