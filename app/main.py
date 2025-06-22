@@ -15,6 +15,7 @@ from app.core.exceptions import (
     not_found_exception_handler,
     method_not_allowed_exception_handler,
     generic_exception_handler,
+    forbidden_exception_handler,
 )
 from app.core.logger import setup_logging
 from pydantic import ValidationError
@@ -126,6 +127,7 @@ def create_app() -> FastAPI:
     app.add_exception_handler(APIException, api_exception_handler)
     app.add_exception_handler(ValidationError, validation_exception_handler)
     app.add_exception_handler(HTTPException, http_exception_handler)
+    app.add_exception_handler(403, forbidden_exception_handler)
     app.add_exception_handler(404, not_found_exception_handler)
     app.add_exception_handler(405, method_not_allowed_exception_handler)
     app.add_exception_handler(Exception, generic_exception_handler)

@@ -210,6 +210,22 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
     )
 
 
+async def forbidden_exception_handler(
+    request: Request, exc: ForbiddenException
+) -> JSONResponse:
+    """
+    Handle 403 Forbidden errors with consistent format.
+    """
+    return JSONResponse(
+        status_code=status.HTTP_403_FORBIDDEN,
+        content=format_error_response(
+            message=getattr(exc, "message", "Forbidden access"),
+            code=ErrorCode.FORBIDDEN,
+            status_code=status.HTTP_403_FORBIDDEN,
+        ),
+    )
+
+
 async def not_found_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """
     Handle 404 Not Found errors with consistent format.
