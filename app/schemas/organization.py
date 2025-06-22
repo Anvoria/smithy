@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Optional, Dict, Annotated
 
-from pydantic import BaseModel, Field, field_validator, EmailStr
+from pydantic import BaseModel, Field, field_validator, EmailStr, computed_field
 
 from app.models.organization import OrganizationType, OrganizationSize
 from app.models.organization_member import OrganizationRole, MemberStatus
@@ -230,16 +230,11 @@ class OrganizationResponse(BaseModel):
     # Limits and quotas
     max_members: int
     max_projects: int
-    max_storage_gb: int
-
-    # Usage statistics
-    current_members: int
-    current_projects: int
-    storage_used_mb: int = 0  # TODO: https://github.com/Anvoria/smithy-backend/issues/5
+    max_storage_gb: int  # TODO: https://github.com/Anvoria/smithy-backend/issues/5
 
     # Configuration
-    settings: Optional[OrganizationSettings]
-    features: Optional[OrganizationFeatures]
+    settings: Optional[OrganizationSettings] = None
+    features: Optional[OrganizationFeatures] = None
 
     # Security settings
     require_2fa: bool
@@ -249,22 +244,95 @@ class OrganizationResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    usage_percentage: Dict[str, float] = Field(
-        default_factory=dict, description="Usage statistics as percentages"
-    )
+    @property
+    @computed_field
+    def current_members(self) -> int:
+        """Safe member count"""
+        return getattr(self, "_current_members", 0)
 
-    is_over_limits: Dict[str, bool] = Field(
-        default_factory=dict,
-        description="Flags indicating if organization is over any limits",
-    )
+    @property
+    @computed_field
+    def storage_used_mb(self) -> int:
+        """Safe storage calculation"""
+        return 0  # TODO: https://github.com/Anvoria/smithy-backend/issues/5
 
-    display_avatar_url: Optional[str] = Field(
-        None, description="URL for display avatar with fallbacks"
-    )
+    @property
+    @computed_field
+    def current_projects(self) -> int:
+        """Safe project count"""
+        return getattr(self, "_current_projects", 0)
 
-    public_url: str = Field(
-        default="/org/{slug}", description="Public URL for the organization"
-    )
+    @property
+    @computed_field
+    def usage_percentage(self) -> Dict[str, float]:
+        """Usage statistics as percentages"""
+        return {
+            "members": (self.current_members / self.max_members) * 100
+            if self.max_members > 0
+            else 0,
+            "projects": (self.current_projects / self.max_projects) * 100
+            if self.max_projects > 0
+            else 0,
+            "storage": (self.storage_used_mb / (self.max_storage_gb * 1024)) * 100
+            if self.max_storage_gb > 0
+            else 0,
+        }
+
+    @property
+    @computed_field
+    def is_over_limits(self) -> Dict[str, bool]:
+        """Flags indicating if organization is over any limits"""
+        return {
+            "members": self.current_members >= self.max_members,
+            "projects": self.current_projects >= self.max_projects,
+            "storage": self.storage_used_mb >= (self.max_storage_gb * 1024),
+        }
+
+    @property
+    @computed_field
+    def display_avatar_url(self) -> Optional[str]:
+        """URL for display avatar with fallbacks"""
+        return self.avatar_url or self.logo_url
+
+    @property
+    @computed_field
+    def public_url(self) -> str:
+        """Public URL for the organization"""
+        return f"/org/{self.slug}"
+
+    @classmethod
+    def from_organization(
+        cls, org, current_members: int = 0, current_projects: int = 0
+    ):
+        """Create response with calculated values"""
+        data = {
+            "id": org.id,
+            "name": org.name,
+            "slug": org.slug,
+            "display_name": org.display_name,
+            "description": org.description,
+            "website_url": org.website_url,
+            "contact_email": org.contact_email,
+            "timezone": org.timezone,
+            "brand_color": org.brand_color,
+            "logo_url": org.logo_url,
+            "avatar_url": org.avatar_url,
+            "banner_url": org.banner_url,
+            "org_type": org.org_type,
+            "company_size": org.company_size,
+            "max_members": org.max_members,
+            "max_projects": org.max_projects,
+            "max_storage_gb": org.max_storage_gb,
+            "settings": org.settings,
+            "features": org.features,
+            "require_2fa": org.require_2fa,
+            "public_projects": org.public_projects,
+            "created_at": org.created_at,
+            "updated_at": org.updated_at,
+            "_current_members": current_members,
+            "_current_projects": current_projects,
+        }
+        return cls(**data)
 
 
 class OrganizationListItem(BaseModel):
@@ -282,15 +350,40 @@ class OrganizationListItem(BaseModel):
     logo_url: Optional[str]
     avatar_url: Optional[str]
 
-    # Usage stats
-    current_members: int
-    current_projects: int
+    # Basic stats
     max_members: int
     max_projects: int
 
     # Metadata
     created_at: datetime
     updated_at: datetime
+
+    @property
+    @computed_field
+    def display_avatar_url(self) -> Optional[str]:
+        """URL for display avatar with fallbacks"""
+        return self.avatar_url or self.logo_url
+
+    @classmethod
+    def from_organization(
+        cls, org, current_members: int = 0, current_projects: int = 0
+    ):
+        """Create list item with calculated values"""
+        return cls(
+            id=org.id,
+            name=org.name,
+            slug=org.slug,
+            display_name=org.display_name,
+            description=org.description,
+            org_type=org.org_type,
+            brand_color=org.brand_color,
+            logo_url=org.logo_url,
+            avatar_url=org.avatar_url,
+            max_members=org.max_members,
+            max_projects=org.max_projects,
+            created_at=org.created_at,
+            updated_at=org.updated_at,
+        )
 
 
 class OrganizationStats(BaseModel):

@@ -26,6 +26,7 @@ from app.core.exceptions import (
     ValidationException,
     ForbiddenException,
 )
+from app.services.common import CommonService
 
 logger = logging.getLogger(__name__)
 
@@ -85,12 +86,12 @@ class OrganizationService:
 
     async def create_organization(
         self, org_data: OrganizationCreate, creator_id: UUID
-    ) -> Organization:
+    ) -> tuple[Organization, int, int]:
         """
         Create a new organization with the given data and assign the creator as an owner.
         :param org_data: OrganizationCreate schema containing organization details.
         :param creator_id: UUID of the user creating the organization.
-        :return: Created Organization object.
+        :return: Tuple of (Created Organization object, member_count, project_count).
         """
         # Check slug uniqueness
         existing_org = await self.get_organization_by_slug(org_data.slug)
@@ -98,6 +99,9 @@ class OrganizationService:
             raise ConflictError(
                 f"Organization with slug '{org_data.slug}' already exists"
             )
+
+        settings_dict = CommonService.serialize_pydantic_to_dict(org_data.settings)
+        features_dict = CommonService.serialize_pydantic_to_dict(org_data.features)
 
         # Create organization
         org = Organization(
@@ -114,8 +118,8 @@ class OrganizationService:
             max_members=org_data.max_members,
             max_projects=org_data.max_projects,
             max_storage_gb=org_data.max_storage_gb,
-            settings=org_data.settings or {},
-            features=org_data.features or {},
+            settings=settings_dict or {},
+            features=features_dict or {},
         )
 
         self.db.add(org)
@@ -134,7 +138,7 @@ class OrganizationService:
         await self.db.commit()
         await self.db.refresh(org)
 
-        return org
+        return org, 1, 0
 
     async def update_organization(
         self, org_id: UUID, update_data: OrganizationUpdate, user_id: UUID
@@ -161,10 +165,15 @@ class OrganizationService:
                 )
 
         # Update fields
-        update_values = {}
+        update_values: dict = {}
         for field, value in update_data.model_dump(exclude_unset=True).items():
             if hasattr(org, field) and value is not None:
-                update_values[field] = value
+                if field in ["settings", "features"]:
+                    update_values[field] = CommonService.serialize_pydantic_to_dict(
+                        value
+                    )
+                else:
+                    update_values[field] = value
 
         if update_values:
             update_values["updated_at"] = datetime.now(UTC)
