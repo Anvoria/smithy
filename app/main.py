@@ -18,6 +18,8 @@ from app.core.exceptions import (
 )
 from app.core.logger import setup_logging
 from pydantic import ValidationError
+
+from app.core.middleware.sanitization import SanitizationMiddleware
 from app.db.redis_client import redis_client
 
 setup_logging()
@@ -99,6 +101,25 @@ def create_app() -> FastAPI:
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+    )
+
+    app.add_middleware(
+        SanitizationMiddleware,
+        enabled=True,
+        skip_paths=[
+            "/docs",
+            "/redoc",
+            "/openapi.json",
+            "/v1/health",
+        ],
+        skip_content_types=[
+            "application/octet-stream",
+            "multipart/form-data",
+            "image/",
+            "video/",
+            "audio/",
+        ],
+        log_sanitization=settings.DEBUG,
     )
 
     # Exception handlers
