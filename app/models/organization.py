@@ -186,7 +186,6 @@ class Organization(Base):
         # Indexes for performance
         Index("idx_org_slug_active", "slug", "deleted_at"),
         Index("idx_org_type_size", "org_type", "company_size"),
-        Index("idx_org_public", "is_public", "status"),
         # Check constraints
         CheckConstraint(
             "LENGTH(slug) >= 2 AND LENGTH(slug) <= 50", name="org_slug_length"
@@ -199,13 +198,6 @@ class Organization(Base):
         CheckConstraint("max_members > 0", name="positive_max_members"),
         CheckConstraint("max_projects > 0", name="positive_max_projects"),
         CheckConstraint("max_storage_gb > 0", name="positive_max_storage"),
-        CheckConstraint("current_members >= 0", name="non_negative_current_members"),
-        CheckConstraint("current_projects >= 0", name="non_negative_current_projects"),
-        CheckConstraint("storage_used_mb >= 0", name="non_negative_storage_used"),
-        CheckConstraint("current_members <= max_members", name="members_within_limit"),
-        CheckConstraint(
-            "current_projects <= max_projects", name="projects_within_limit"
-        ),
         # Unique constraints
         UniqueConstraint("slug", name="unique_org_slug"),
     )

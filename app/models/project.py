@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, UTC
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from enum import Enum
 
 from sqlalchemy import (
@@ -17,8 +17,10 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+if TYPE_CHECKING:
+    from app.models.project_member import ProjectMember
+
 from app.db.base import Base
-from app.models.project_member import ProjectRole, ProjectMember
 
 
 class ProjectStatus(str, Enum):
@@ -182,7 +184,8 @@ class Project(Base):
     # Relationships
     organization = relationship("Organization", back_populates="projects")
     lead = relationship("User", foreign_keys=[lead_id])
-    tasks = relationship("Task", back_populates="project", cascade="all, delete-orphan")
+    # tasks = relationship("Task", back_populates="project", cascade="all, delete-orphan") #TODO https://github.com/Anvoria/smithy-backend/issues/7
+    tasks: list = []
     members = relationship(
         "ProjectMember", back_populates="project", cascade="all, delete-orphan"
     )
@@ -200,19 +203,12 @@ class Project(Base):
         Index("idx_project_archived", "archived_at", "organization_id"),
         # Check constraints
         CheckConstraint(
-            "LENGTH(key) >= 2 AND  █LENGTH(key) <= 6", name="project_key_length"
+            "LENGTH(key) >= 2 AND LENGTH(key) <= 6", name="project_key_length"
         ),
         CheckConstraint("key ~ '^[A-Z][A-Z0-9]*$'", name="project_key_format"),
         CheckConstraint(
             "color IS NULL OR color ~ '^#[0-9A-Fa-f]{6}$'", name="valid_hex_color"
         ),
-        CheckConstraint("total_tasks >= 0", name="non_negative_total_tasks"),
-        CheckConstraint("completed_tasks >= 0", name="non_negative_completed_tasks"),
-        CheckConstraint(
-            "completed_tasks <= total_tasks", name="completed_tasks_within_total"
-        ),
-        CheckConstraint("total_time_spent >= 0", name="non_negative_time_spent"),
-        CheckConstraint("task_counter >= 0", name="non_negative_task_counter"),
         CheckConstraint(
             "start_date IS NULL OR due_date IS NULL OR start_date <= due_date",
             name="valid_date_range",
@@ -371,7 +367,11 @@ class Project(Base):
 
         # Check project-specific permissions
         project_member = self.get_user_project_membership(user_id)
-        if project_member and project_member.role == ProjectRole.LEAD:
+        if (
+            project_member
+            and project_member.role
+            and str(project_member.role.value) == "lead"
+        ):
             return True
 
         # Org owners/admins can edit any project
@@ -406,45 +406,6 @@ class Project(Base):
         if user_role_in_org in ["owner", "admin", "manager"]:
             return True
 
-        return False
-
-    def add_member(
-        self,
-        user_id: uuid.UUID,
-        role: ProjectRole = ProjectRole.DEVELOPER,
-        added_by: uuid.UUID | None = None,
-    ) -> "ProjectMember":
-        """
-        Add a user to the project with a specific role.
-        :param user_id: UUID of the user to add
-        :param role: Role to assign to the user in this project
-        :param added_by: UUID of the user who added this member (optional)
-        :return:
-        """
-        # Check if already member
-        existing = self.get_user_project_membership(user_id)
-        if existing:
-            # Update role if different
-            existing.role = role
-            return existing
-
-        # Create new membership
-        member = ProjectMember(
-            project_id=self.id, user_id=user_id, role=role, added_by=added_by
-        )
-        self.members.append(member)
-        return member
-
-    def remove_member(self, user_id: uuid.UUID) -> bool:
-        """
-        Remove a user from the project.
-        :param user_id: UUID of the user to remove
-        :return: True if user was removed, False if not a member
-        """
-        member = self.get_user_project_membership(user_id)
-        if member:
-            self.members.remove(member)
-            return True
         return False
 
     def get_project_url(self) -> str:
