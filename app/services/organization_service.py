@@ -456,7 +456,7 @@ class OrganizationService:
         return member.role in [
             OrganizationRole.OWNER,
             OrganizationRole.ADMIN,
-        ]  # TODO https://github.com/Anvoria/smithy-backend/issues/6
+        ]  # TODO https://github.com/Anvoria/smithy/issues/6
 
     async def can_user_manager_members(self, user_id: UUID, org: Organization) -> bool:
         """
@@ -471,7 +471,7 @@ class OrganizationService:
 
         return (
             member.can_manage_members
-        )  # TODO https://github.com/Anvoria/smithy-backend/issues/6
+        )  # TODO https://github.com/Anvoria/smithy/issues/6
 
     async def get_user_role_in_organization(
         self, user_id: UUID, org_id: UUID

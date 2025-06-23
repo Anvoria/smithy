@@ -249,7 +249,7 @@ class AuthService:
             return
 
         # TODO: Implement logic to track failed login attempts
-        # https://github.com/Anvoria/smithy-backend/issues/3
+        # https://github.com/Anvoria/smithy/issues/3
         pass
 
     async def _update_login_info(self, user: User) -> None:

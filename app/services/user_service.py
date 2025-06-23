@@ -104,7 +104,7 @@ class UserService:
 
         return user
 
-    # TODO: https://github.com/Anvoria/smithy-backend/issues/4
+    # TODO: https://github.com/Anvoria/smithy/issues/4
     async def change_user_password(
         self, user_id: UUID, password_data: UserPasswordUpdate
     ) -> bool:
@@ -141,7 +141,7 @@ class UserService:
 
         return True
 
-    # TODO: https://github.com/Anvoria/smithy-backend/issues/4
+    # TODO: https://github.com/Anvoria/smithy/issues/4
     async def change_user_email(
         self, user_id: UUID, email_data: UserEmailUpdate
     ) -> User:

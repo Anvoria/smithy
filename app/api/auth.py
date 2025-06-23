@@ -83,19 +83,14 @@ async def logout(
 
     Blacklists access and refresh tokens to prevent further use.
     """
-    try:
-        auth_service = AuthService(db)
-        success = await auth_service.logout_user(
-            access_token=credentials.credentials,
-            refresh_token=logout_data.refresh_token,
-        )
+    auth_service = AuthService(db)
+    success = await auth_service.logout_user(
+        access_token=credentials.credentials,
+        refresh_token=logout_data.refresh_token,
+    )
 
-        if success:
-            return {"message": "Logged out successfully"}
-        else:
-            logger.warning("Partial logout - some tokens may not be revoked")
-            return {"message": "Logged out (some tokens may still be valid)"}
-
-    except Exception as e:
-        logger.error(f"Logout error: {e}")
-        return {"message": "Logged out"}
+    if success:
+        return {"message": "Logged out successfully"}
+    else:
+        logger.warning("Partial logout - some tokens may not be revoked")
+        return {"message": "Logged out (some tokens may still be valid)"}

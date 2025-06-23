@@ -230,7 +230,7 @@ class OrganizationResponse(BaseModel):
     # Limits and quotas
     max_members: int
     max_projects: int
-    max_storage_gb: int  # TODO: https://github.com/Anvoria/smithy-backend/issues/5
+    max_storage_gb: int  # TODO: https://github.com/Anvoria/smithy/issues/5
 
     # Configuration
     settings: Optional[OrganizationSettings] = None
@@ -254,7 +254,7 @@ class OrganizationResponse(BaseModel):
     @computed_field
     def storage_used_mb(self) -> int:
         """Safe storage calculation"""
-        return 0  # TODO: https://github.com/Anvoria/smithy-backend/issues/5
+        return 0  # TODO: https://github.com/Anvoria/smithy/issues/5
 
     @property
     @computed_field

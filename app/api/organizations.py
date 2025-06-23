@@ -95,7 +95,7 @@ async def get_organization_stats(
     """
     Get organization statistics for admin dashboard.
     """
-    # TODO: https://github.com/Anvoria/smithy-backend/issues/8
+    # TODO: https://github.com/Anvoria/smithy/issues/8
 
     # Placeholder stats
     stats = OrganizationStats(

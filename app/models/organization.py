@@ -213,7 +213,7 @@ class Organization(Base):
         return len([p for p in self.projects if not p.deleted_at])
 
     # TODO: Implement storage calculation based on actual project data
-    # https://github.com/Anvoria/smithy-backend/issues/5
+    # https://github.com/Anvoria/smithy/issues/5
     @property
     def storage_used_mb(self) -> int:
         return 0
