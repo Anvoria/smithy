@@ -4,14 +4,14 @@ services:
   smithy_backend:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: backend/Dockerfile
     container_name: smithy_backend
     environment:
       - SMITHY_ENV=production
       - DATABASE_URL=postgresql+asyncpg://smithy:smithy@postgres:5432/smithy
       - REDIS_URL=redis://redis:6379/0
     env_file:
-      - .env
+      - backend/.env
     depends_on:
       postgres:
         condition: service_healthy

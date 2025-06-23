@@ -1,15 +1,25 @@
-name: CI
+name: Backend CI
 
 on:
   push:
     branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend.yml'
   pull_request:
     branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend.yml'
 
 jobs:
   lint-and-format:
     name: Lint & Format
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
     steps:
     - uses: actions/checkout@v4
 
@@ -22,7 +32,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
 
@@ -33,10 +43,10 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
     - name: Run Ruff (lint)
-      run: ruff check .
+      run: ruff check app/
 
     - name: Run Ruff (format check)
-      run: ruff format --check .
+      run: ruff format app/ --check
 
     - name: Run MyPy
       run: mypy app/ --ignore-missing-imports
@@ -45,6 +55,10 @@ jobs:
   security:
     name: Security Checks
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
     steps:
     - uses: actions/checkout@v4
 
@@ -57,7 +71,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-security-${{ hashFiles('requirements.txt') }}
+        key: ${{ runner.os }}-pip-security-${{ hashFiles('backend/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-security-
           ${{ runner.os }}-pip-
@@ -76,7 +90,7 @@ jobs:
       if: always()
       with:
         name: bandit-report
-        path: bandit-report.json
+        path: backend/bandit-report.json
 
     - name: Check dependencies for vulnerabilities
       run: safety check --full-report --json > safety-report.json
@@ -87,4 +101,4 @@ jobs:
       if: always()
       with:
         name: safety-report
-        path: safety-report.json
+        path: backend/safety-report.json
