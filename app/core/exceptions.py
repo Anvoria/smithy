@@ -50,7 +50,7 @@ class NotFoundException(APIException):
     """
 
     def __init__(self, resource: str, identifier: Optional[str] = None):
-        message = f"{resource} not found"
+        message = f"{resource}"
         if identifier:
             message += f" (ID: {identifier})"
 
@@ -282,7 +282,9 @@ async def not_found_exception_handler(request: Request, exc: Exception) -> JSONR
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
         content=format_error_response(
-            message="The requested resource was not found",
+            message="The requested resource was not found"
+            if not isinstance(exc, NotFoundException)
+            else exc.message,
             code=ErrorCode.NOT_FOUND,
             status_code=status.HTTP_404_NOT_FOUND,
         ),
