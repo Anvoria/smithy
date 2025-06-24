@@ -3,13 +3,15 @@ import qrcode
 import io
 import base64
 import logging
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, UTC, timedelta
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from uuid import UUID
 
 import pyotp
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, func
 from passlib.context import CryptContext
 
 from app.core.config import settings
@@ -33,8 +35,11 @@ from app.db.redis_client import redis_client
 logger = logging.getLogger(__name__)
 
 backup_code_context = CryptContext(
-    schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=8
+    schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=6
 )
+
+# Global thread pool for CPU-intensive operations
+thread_pool = ThreadPoolExecutor(max_workers=4, thread_name_prefix="mfa_")
 
 
 class MFAService:
@@ -60,14 +65,24 @@ class MFAService:
 
         secret = pyotp.random_base32()
 
-        backup_codes = self._generate_backup_codes()
+        loop = asyncio.get_event_loop()
+
+        backup_codes_task = loop.run_in_executor(
+            thread_pool, self._generate_backup_codes, 10
+        )
 
         totp = pyotp.TOTP(secret)
         provisioning_uri = totp.provisioning_uri(
             name=str(user.email), issuer_name=settings.APP_NAME
         )
 
-        qr_code_url = self._generate_qr_code(provisioning_uri)
+        qr_code_task = loop.run_in_executor(
+            thread_pool, self._generate_qr_code, provisioning_uri
+        )
+
+        backup_codes, qr_code_url = await asyncio.gather(
+            backup_codes_task, qr_code_task
+        )
 
         # Store temporary data in Redis
         temp_data = {
@@ -76,7 +91,7 @@ class MFAService:
             "setup_timestamp": datetime.now(UTC).isoformat(),
         }
 
-        await redis_client.set(f"mfa_setup:{user_id}", temp_data, expire=60 * 10)
+        await redis_client.set(f"mfa_setup:{user_id}", temp_data, expire=600)
 
         return MFASetupResponse(
             secret=secret, qr_code_url=qr_code_url, backup_codes=backup_codes
@@ -119,8 +134,6 @@ class MFAService:
 
             await redis_client.delete(f"mfa_setup:{user_id}")
 
-            await self.db.get(User, user_id)
-
             return True
         except Exception as e:
             await self.db.rollback()
@@ -141,16 +154,30 @@ class MFAService:
         :param check_backup: Whether to check backup codes if TOTP verification fails
         :return: True if the code is valid, False otherwise
         """
-        user = await self.db.get(User, user_id)
-        if not user or not user.mfa_enabled or not user.mfa_secret:
-            raise NotFoundException("User not found or MFA not enabled")
+        cache_key = f"mfa_user:{user_id}"
+        cached_user = await redis_client.get(cache_key)
 
-        if self._verify_totp_code(str(user.mfa_secret), code):
-            return True
+        if cached_user and isinstance(cached_user, dict):
+            user_secret = cached_user.get("mfa_secret")
+            if user_secret and self._verify_totp_code(user_secret, code):
+                return True
+        else:
+            user = await self.db.get(User, user_id)
+            if not user or not user.mfa_enabled or not user.mfa_secret:
+                raise NotFoundException("User not found or MFA not enabled")
+
+            # Cache user data for 5 minutes
+            await redis_client.set(
+                cache_key,
+                {"mfa_secret": user.mfa_secret, "mfa_enabled": True},
+                expire=300,
+            )
+
+            if self._verify_totp_code(str(user.mfa_secret), code):
+                return True
 
         if check_backup:
-            if await self._verify_backup_code(user_id, code, ip_address):
-                return True
+            return await self._verify_backup_code(user_id, code, ip_address)
 
         return False
 
@@ -167,8 +194,7 @@ class MFAService:
             raise ValidationException("MFA is not enabled for this user")
 
         if not await self.verify_mfa_code(user_id, disable_data.code):
-            if not await self._verify_backup_code(user_id, disable_data.code):
-                raise ValidationException("Invalid MFA code")
+            raise ValidationException("Invalid MFA code")
 
         try:
             stmt = (
@@ -184,6 +210,8 @@ class MFAService:
             await self.db.execute(delete_stmt)
 
             await self.db.commit()
+
+            await redis_client.delete(f"mfa_user:{user_id}")
 
             return True
         except Exception as e:
@@ -202,7 +230,11 @@ class MFAService:
         if not user.mfa_enabled or not user.mfa_secret:
             raise ValidationException("MFA is not enabled for this user")
 
-        backup_codes = self._generate_backup_codes()
+        # Generate codes in thread pool
+        loop = asyncio.get_event_loop()
+        backup_codes = await loop.run_in_executor(
+            thread_pool, self._generate_backup_codes, 10
+        )
 
         try:
             delete_stmt = delete(MFABackupCode).where(MFABackupCode.user_id == user_id)
@@ -230,19 +262,31 @@ class MFAService:
         if not user.mfa_enabled or not user.mfa_secret:
             raise ValidationException("MFA is not enabled for this user")
 
-        stmt = select(MFABackupCode).where(MFABackupCode.user_id == user_id)
-        result = await self.db.execute(stmt)
-        backup_codes = result.scalars().all()
+        result = await self.db.execute(
+            select(
+                func.count(MFABackupCode.id).label("total"),
+                func.sum(func.cast(MFABackupCode.is_used, func.INTEGER())).label(
+                    "used"
+                ),
+                func.max(MFABackupCode.generated_at).label("last_generated"),
+            ).where(MFABackupCode.user_id == user_id)
+        )
 
-        total_codes = len(backup_codes)
-        used_codes = len([code for code in backup_codes if code.is_used])
-        remaining_codes = total_codes - used_codes
+        row = result.fetchone()
+        if row:
+            total_codes = row.total or 0
+            used_codes = row.used or 0
+            last_generated = row.last_generated
+        else:
+            total_codes = 0
+            used_codes = 0
+            last_generated = None
 
         return MFABackupCodesInfo(
             total_codes=total_codes,
             used_codes=used_codes,
-            remaining_codes=remaining_codes,
-            last_generated=backup_codes[0].generated_at if backup_codes else None,
+            remaining_codes=total_codes - used_codes,
+            last_generated=last_generated,
         )
 
     async def _get_user_and_verify_password(
@@ -258,9 +302,19 @@ class MFAService:
         if not user:
             raise NotFoundException("User", str(user_id))
 
-        if not user.password_hash or not self.password_manager.verify_password(
-            password, str(user.password_hash)
-        ):
+        if not user.password_hash:
+            raise AuthenticationException("Invalid password")
+
+        # Verify password in thread pool (bcrypt is CPU intensive)
+        loop = asyncio.get_event_loop()
+        is_valid = await loop.run_in_executor(
+            thread_pool,
+            self.password_manager.verify_password,
+            password,
+            str(user.password_hash),
+        )
+
+        if not is_valid:
             raise AuthenticationException("Invalid password")
 
         return user
@@ -288,7 +342,7 @@ class MFAService:
         :return: True if the code is valid, False otherwise
         """
         totp = pyotp.TOTP(secret)
-        return totp.verify(code, valid_window=1)  # clock skew tolerance of 1 minute
+        return totp.verify(code, valid_window=1)
 
     def _generate_qr_code(self, provisioning_uri: str) -> str:
         """
@@ -317,17 +371,33 @@ class MFAService:
         :param user_id: UUID of the user
         :param backup_codes: List of backup codes to store
         """
-        for code in backup_codes:
-            hashed_code = backup_code_context.hash(code)
-            backup_code = MFABackupCode(
+
+        async def hash_code(code: str) -> str:
+            """Hash single code in thread pool"""
+            loop = asyncio.get_event_loop()
+            return await loop.run_in_executor(
+                thread_pool, backup_code_context.hash, code
+            )
+
+        hash_tasks = [hash_code(code) for code in backup_codes]
+        hashed_codes = await asyncio.gather(*hash_tasks)
+
+        # Create objects for batch insert
+        now = datetime.now(UTC)
+        expires = now + timedelta(days=365)
+
+        backup_code_objects = [
+            MFABackupCode(
                 user_id=user_id,
                 code_hash=hashed_code,
-                generated_at=datetime.now(UTC),
-                expires_at=datetime.now(UTC) + timedelta(days=365),
+                generated_at=now,
+                expires_at=expires,
             )
-            self.db.add(backup_code)
+            for hashed_code in hashed_codes
+        ]
 
-        # Do not commit here, let the caller handle it
+        # Bulk insert
+        self.db.add_all(backup_code_objects)
 
     async def _verify_backup_code(
         self, user_id: UUID, code: str, ip_address: Optional[str] = None
@@ -339,18 +409,63 @@ class MFAService:
         :param ip_address: IP address for logging purposes
         :return: True if the backup code is valid and not used, False otherwise
         """
-        stmt = select(MFABackupCode).where(
-            MFABackupCode.user_id == user_id,
-            MFABackupCode.is_used == False,  # noqa: E712
-            MFABackupCode.expires_at > datetime.now(UTC),
+        # Get only a limited number of unused codes
+        stmt = (
+            select(MFABackupCode)
+            .where(
+                MFABackupCode.user_id == user_id,
+                MFABackupCode.is_used == False,  # noqa: E712
+                MFABackupCode.expires_at > datetime.now(UTC),
+            )
+            .limit(15)
         )
+
         result = await self.db.execute(stmt)
         backup_codes = result.scalars().all()
 
-        for backup_code in backup_codes:
-            if backup_code_context.verify(code, backup_code.code_hash):
-                backup_code.mark_as_used(ip_address)
-                await self.db.commit()
+        if not backup_codes:
+            return False
 
-                return True
+        loop = asyncio.get_event_loop()
+
+        async def verify_single_code(
+            backup_code: MFABackupCode,
+        ) -> Tuple[MFABackupCode, bool]:
+            """Verify single backup code in thread pool"""
+            is_match = await loop.run_in_executor(
+                thread_pool,
+                lambda: backup_code_context.verify(code, backup_code.code_hash),
+            )
+            return (backup_code, is_match)
+
+        # Create and run all verification tasks
+        verification_tasks = [
+            asyncio.create_task(verify_single_code(backup_code))
+            for backup_code in backup_codes
+        ]
+
+        # Use asyncio.as_completed for early termination
+        for completed_task in asyncio.as_completed(verification_tasks):
+            try:
+                backup_code_obj, is_match = await completed_task
+
+                if is_match:
+                    # Found matching code - mark as used
+                    backup_code_obj.mark_as_used(ip_address)
+                    await self.db.commit()
+
+                    # Cancel remaining tasks to save CPU
+                    for task in verification_tasks:
+                        if not task.done():
+                            task.cancel()
+
+                    return True
+
+            except asyncio.CancelledError:
+                continue
+
+        for task in verification_tasks:
+            if not task.done():
+                task.cancel()
+
         return False
