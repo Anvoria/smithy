@@ -1,10 +1,11 @@
 import logging
-from typing import Annotated
+from typing import Annotated, Union
 
 from fastapi import APIRouter, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import AuthenticationException
 from app.db.client import get_db
 from app.schemas.auth import (
     LoginRequest,
@@ -12,6 +13,8 @@ from app.schemas.auth import (
     TokenResponse,
     RefreshTokenRequest,
     LogoutRequest,
+    MFARequiredResponse,
+    MFALoginRequest,
 )
 from app.services.auth_service import AuthService
 
@@ -40,18 +43,44 @@ async def register_user(
     return tokens
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=Union[TokenResponse, MFARequiredResponse])
 async def login(
     login_data: LoginRequest, db: Annotated[AsyncSession, Depends(get_db)]
-) -> TokenResponse:
+) -> Union[TokenResponse, MFARequiredResponse]:
     """
-    Authenticate user and create session.
+     Authenticate user and create session.
 
-    Returns access and refresh tokens on successful authentication.
-    Implements account locking after failed attempts.
+     Returns access and refresh tokens on successful authentication.
+    If MFA is enabled and no MFA code is provided, returns MFARequiredResponse
     """
     auth_service = AuthService(db)
-    tokens = await auth_service.authenticate_user(login_data)
+
+    try:
+        tokens = await auth_service.authenticate_user(login_data)
+        return tokens
+    except AuthenticationException as e:
+        if hasattr(e, "details") and e.details and e.details.get("requires_mfa"):
+            return MFARequiredResponse(
+                message="MFA required",
+                requires_mfa=True,
+                partial_auth_token=e.details["partial_auth_token"],
+            )
+        raise
+
+
+@router.post("/mfa/complete", response_model=TokenResponse)
+async def complete_mfa_login(
+    mfa_data: MFALoginRequest, db: Annotated[AsyncSession, Depends(get_db)]
+) -> TokenResponse:
+    """
+    Complete MFA authentication using partial auth token.
+
+    Returns access and refresh tokens after successful MFA verification.
+    """
+    auth_service = AuthService(db)
+    tokens = await auth_service.complete_mfa_authentication(
+        mfa_data.partial_auth_token, mfa_data.mfa_code
+    )
 
     return tokens
 

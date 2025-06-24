@@ -1,23 +1,6 @@
 version: '3.9'
 
 services:
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    container_name: smithy_api_dev
-    volumes:
-      - .:/app
-    ports:
-      - "8000:8000"
-    env_file:
-      - backend/.env
-    depends_on:
-      - postgres
-      - redis
-    networks:
-      - smithy_network
-
   postgres:
     image: postgres:15-alpine
     container_name: smithy_postgres

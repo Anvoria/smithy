@@ -122,6 +122,22 @@ class UserEmailUpdate(BaseModel):
     password: str = Field(..., description="Current password for verification")
 
 
+class UserPasswordUpdateMFA(UserPasswordUpdate):
+    """Extended password update schema with MFA support"""
+
+    mfa_code: Optional[str] = Field(
+        None, min_length=6, max_length=8, description="MFA code if MFA is enabled"
+    )
+
+
+class UserEmailUpdateMFA(UserEmailUpdate):
+    """Extended email update schema with MFA support"""
+
+    mfa_code: Optional[str] = Field(
+        None, min_length=6, max_length=8, description="MFA code if MFA is enabled"
+    )
+
+
 class UserRoleUpdate(BaseModel):
     """Schema for admin role updates"""
 
@@ -275,45 +291,6 @@ class PasswordResetConfirm(BaseModel):
 
 
 # ==========================================
-# MFA Schemas
-# ==========================================
-
-
-class MFASetupRequest(BaseModel):
-    """MFA setup initiation"""
-
-    password: str = Field(..., description="Current password for verification")
-
-
-class MFASetupResponse(BaseModel):
-    """MFA setup response"""
-
-    secret: str = Field(..., description="TOTP secret")
-    qr_code_url: str = Field(..., description="QR code URL")
-    backup_codes: list[str] = Field(..., description="Backup codes")
-
-
-class MFAVerifyRequest(BaseModel):
-    """MFA verification"""
-
-    code: Annotated[
-        str, Field(min_length=6, max_length=6, description="6-digit TOTP code")
-    ]
-
-
-class MFADisableRequest(BaseModel):
-    """Disable MFA"""
-
-    password: str = Field(..., description="Current password")
-    code: Annotated[
-        Optional[str],
-        Field(
-            default=None, min_length=6, max_length=6, description="6-digit TOTP code"
-        ),
-    ]
-
-
-# ==========================================
 # Export all schemas
 # ==========================================
 
@@ -324,7 +301,9 @@ __all__ = [
     "UserCreate",
     "UserUpdate",
     "UserPasswordUpdate",
+    "UserPasswordUpdateMFA",
     "UserEmailUpdate",
+    "UserEmailUpdateMFA",
     "UserRoleUpdate",
     "UserStatusUpdate",
     # Response schemas
@@ -341,9 +320,4 @@ __all__ = [
     "EmailVerificationConfirm",
     "PasswordResetRequest",
     "PasswordResetConfirm",
-    # MFA
-    "MFASetupRequest",
-    "MFASetupResponse",
-    "MFAVerifyRequest",
-    "MFADisableRequest",
 ]

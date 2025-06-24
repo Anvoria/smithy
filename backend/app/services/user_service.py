@@ -9,11 +9,11 @@ from sqlalchemy import select, update, func, or_
 from app.models.user import User, UserStatus, UserRole
 from app.schemas.user import (
     UserUpdate,
-    UserPasswordUpdate,
-    UserEmailUpdate,
     UserRoleUpdate,
     UserStatusUpdate,
     UserStats,
+    UserPasswordUpdateMFA,
+    UserEmailUpdateMFA,
 )
 from app.core.security import PasswordManager, VerificationTokenManager
 from app.core.exceptions import (
@@ -23,6 +23,7 @@ from app.core.exceptions import (
     ForbiddenException,
     AuthenticationException,
 )
+from app.services.mfa_service import MFAService
 
 logger = logging.getLogger(__name__)
 
@@ -104,14 +105,17 @@ class UserService:
 
         return user
 
-    # TODO: https://github.com/Anvoria/smithy/issues/4
     async def change_user_password(
-        self, user_id: UUID, password_data: UserPasswordUpdate
+        self,
+        user_id: UUID,
+        password_data: UserPasswordUpdateMFA,
+        ip_address: Optional[str] = None,
     ) -> bool:
         """
         Change the password for a user.
         :param user_id: UUID of the user whose password is to be changed.
-        :param password_data: UserPasswordUpdate schema containing the current and new passwords.
+        :param password_data: UserPasswordUpdateMFA schema containing the current password, new password, and optional MFA code.
+        :param ip_address: Optional IP address for MFA verification.
         :return: True if password was changed successfully, otherwise raises an exception.
         """
         user = await self.get_user_by_id(user_id)
@@ -121,6 +125,17 @@ class UserService:
             password_data.current_password, user.password_hash
         ):
             raise AuthenticationException("Current password is incorrect")
+
+        if user.mfa_enabled:
+            if not password_data.mfa_code:
+                raise AuthenticationException("MFA code required for password change")
+
+            mfa_service = MFAService(self.db)
+
+            if not await mfa_service.verify_mfa_code(
+                user_id, password_data.mfa_code, ip_address
+            ):
+                raise AuthenticationException("Invalid MFA code")
 
         # Hash new password
         new_password_hash = self.password_manager.hash_password(
@@ -141,14 +156,17 @@ class UserService:
 
         return True
 
-    # TODO: https://github.com/Anvoria/smithy/issues/4
     async def change_user_email(
-        self, user_id: UUID, email_data: UserEmailUpdate
+        self,
+        user_id: UUID,
+        email_data: UserEmailUpdateMFA,
+        ip_address: Optional[str] = None,
     ) -> User:
         """
         Change the email address for a user.
         :param user_id: UUID of the user whose email is to be changed.
-        :param email_data: UserEmailUpdate schema containing the new email and current password.
+        :param email_data: UserEmailUpdateMFA schema containing the new email, current password, and optional MFA code.
+        :param ip_address: Optional IP address for MFA verification.
         :return: Updated User object with new email.
         """
         user = await self.get_user_by_id(user_id)
@@ -158,6 +176,17 @@ class UserService:
             email_data.password, user.password_hash
         ):
             raise AuthenticationException("Current password is incorrect")
+
+        if user.mfa_enabled:
+            if not email_data.mfa_code:
+                raise AuthenticationException("MFA code required for email change")
+
+            mfa_service = MFAService(self.db)
+
+            if not await mfa_service.verify_mfa_code(
+                user_id, email_data.mfa_code, ip_address
+            ):
+                raise AuthenticationException("Invalid MFA code")
 
         # Check if new email is already taken
         existing_user = await self.get_user_by_email(str(email_data.new_email))

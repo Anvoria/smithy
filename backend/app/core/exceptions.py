@@ -81,11 +81,16 @@ class AuthenticationException(APIException):
     Exception raised for authentication errors.
     """
 
-    def __init__(self, message: str = "Authentication required"):
+    def __init__(
+        self,
+        message: str = "Authentication required",
+        details: Optional[Dict[str, Any]] = None,
+    ):
         super().__init__(
             message=message,
             status_code=status.HTTP_401_UNAUTHORIZED,
             code=ErrorCode.UNAUTHORIZED,
+            details=details or {},
         )
 
 

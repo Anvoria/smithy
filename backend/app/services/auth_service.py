@@ -1,13 +1,14 @@
 import logging
 from datetime import datetime, timedelta, UTC
 from typing import Optional, Tuple
+from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 
 from app.models.user import User, UserStatus
 from app.schemas.auth import LoginRequest, RegisterRequest, AuthUser, TokenResponse
-from app.core.security import PasswordManager, TokenManager
+from app.core.security import PasswordManager, TokenManager, VerificationTokenManager
 from app.db.redis_client import redis_client
 from app.core.config import settings
 from app.core.exceptions import (
@@ -16,6 +17,8 @@ from app.core.exceptions import (
     NotFoundException,
     ForbiddenException,
 )
+
+from app.services.mfa_service import MFAService
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +30,7 @@ class AuthService:
         self.db = db
         self.password_manager = PasswordManager()
         self.token_manager = TokenManager()
+        self.verification_token_manager = VerificationTokenManager()
 
     async def register_user(
         self, user_data: RegisterRequest
@@ -54,7 +58,7 @@ class AuthService:
             first_name=user_data.first_name,
             last_name=user_data.last_name,
             password_hash=hashed_password,
-            status=UserStatus.PENDING_VERIFICATION,
+            status=UserStatus.ACTIVE,  # TODO: https://github.com/Anvoria/smithy/issues/13
         )
 
         self.db.add(new_user)
@@ -85,13 +89,79 @@ class AuthService:
         if not user.is_active or user.status == UserStatus.SUSPENDED:
             raise ForbiddenException("User account is not active")
 
+        if user.mfa_enabled:
+            if not hasattr(login_data, "mfa_code") or not login_data.mfa_code:
+                partial_auth_token = (
+                    self.verification_token_manager.generate_verification_token()
+                )
+                await redis_client.set(
+                    f"partial_auth:{partial_auth_token}",
+                    {
+                        "user_id": str(user.id),
+                        "timestamp": datetime.now(UTC).isoformat(),
+                    },
+                    expire=60 * 5,
+                )
+
+                raise AuthenticationException(
+                    "MFA code required",
+                    details={
+                        "required_mfa": True,
+                        "partial_auth_token": partial_auth_token,
+                    },
+                )
+
+            mfa_service = MFAService(self.db)
+            if not await mfa_service.verify_mfa_code(
+                UUID(str(user.id)), login_data.mfa_code
+            ):
+                raise AuthenticationException("Invalid MFA code")
+
         # Update login information
         await self._update_login_info(user)
 
         # Generate tokens
         tokens = await self._create_user_session(user)
 
-        logger.info(f"User authenticated successfully: {user.email}")
+        return tokens
+
+    async def complete_mfa_authentication(
+        self, partial_auth_token: str, mfa_code: str
+    ) -> TokenResponse:
+        """
+        Complete MFA authentication using partial auth token.
+
+        :param partial_auth_token: Token from initial authentication
+        :param mfa_code: MFA code for verification
+        :return: TokenResponse with access and refresh tokens
+        """
+        partial_data = await redis_client.get(f"partial_auth:{partial_auth_token}")
+        if not partial_data:
+            raise AuthenticationException("Invalid or expired authentication session")
+
+        user_id = partial_data["user_id"]
+        user = await self.db.get(User, user_id)
+
+        if not user or not user.mfa_enabled:
+            raise AuthenticationException("Invalid authentication session")
+
+        # Verify MFA code
+        mfa_service = MFAService(self.db)
+
+        if not await mfa_service.verify_mfa_code(
+            UUID(str(user.id)), mfa_code, check_backup=False
+        ):
+            raise AuthenticationException("Invalid MFA code")
+
+        # Clean up partial auth
+        await redis_client.delete(f"partial_auth:{partial_auth_token}")
+
+        # Update login information
+        await self._update_login_info(user)
+
+        # Generate tokens
+        tokens = await self._create_user_session(user)
+
         return tokens
 
     async def refresh_access_token(self, refresh_token: str) -> TokenResponse:
@@ -186,12 +256,15 @@ class AuthService:
         )
 
         # Create tokens
-        print(type(user.role), user.role)
         access_token = self.token_manager.create_access_token(
             subject=user.email,
             user_id=str(user.id),
             role=user.role.value,
             expires_delta=access_expire,
+            additional_claims={
+                "mfa_enabled": user.mfa_enabled,
+                "is_verified": user.is_verified,
+            },
         )
 
         refresh_token = self.token_manager.create_refresh_token(
@@ -205,6 +278,7 @@ class AuthService:
             "role": user.role.value,
             "login_at": datetime.now(UTC).isoformat(),
             "remember_me": remember_me,
+            "mfa_enabled": user.mfa_enabled,
         }
 
         # Get session ID from access token

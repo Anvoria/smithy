@@ -174,13 +174,13 @@ class TokenManager:
 
 
 class VerificationTokenManager:
-    """Utilities for email verification and password reset tokens"""
+    """Utilities for email verification, MFA, and password reset tokens"""
 
     @staticmethod
     def generate_verification_token() -> str:
         """
-        Generate secure email verification token
-        :return: A secure token string for email verification.
+        Generate secure email verification/partial authentication token
+        :return: A secure token string for email verification or partial authentication.
         """
         return secrets.token_urlsafe(32)
 

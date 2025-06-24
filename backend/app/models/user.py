@@ -220,6 +220,12 @@ class User(Base):
     project_memberships = relationship(
         "ProjectMember", foreign_keys="ProjectMember.user_id", back_populates="user"
     )
+    mfa_backup_codes = relationship(
+        "MFABackupCode",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="dynamic",
+    )
 
     @property
     def avatar_url(self) -> Optional[str]:

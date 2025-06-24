@@ -7,5 +7,13 @@ from .organization import Organization
 from .organization_member import OrganizationMember
 from .project import Project
 from .project_member import ProjectMember
+from .mfa_backup_code import MFABackupCode
 
-__all__ = ["User", "Organization", "OrganizationMember", "Project", "ProjectMember"]
+__all__ = [
+    "User",
+    "Organization",
+    "OrganizationMember",
+    "Project",
+    "ProjectMember",
+    "MFABackupCode",
+]

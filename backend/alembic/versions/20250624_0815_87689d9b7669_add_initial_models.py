@@ -1,8 +1,8 @@
-"""initial models
+"""add initial models
 
-Revision ID: 244769b8ff1e
+Revision ID: 87689d9b7669
 Revises:
-Create Date: 2025-06-22 18:27:47.681198+00:00
+Create Date: 2025-06-24 08:15:30.565983+00:00
 
 🚧 SMITHY MIGRATION 🚧
 This file was automatically forged by Alembic.
@@ -16,7 +16,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = "244769b8ff1e"
+revision: str = "87689d9b7669"
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -401,6 +401,75 @@ def upgrade() -> None:
     )
     op.create_index(op.f("ix_users_username"), "users", ["username"], unique=True)
     op.create_table(
+        "mfa_backup_codes",
+        sa.Column(
+            "user_id",
+            sa.UUID(),
+            nullable=False,
+            comment="User who owns this backup code",
+        ),
+        sa.Column(
+            "code_hash",
+            sa.String(length=255),
+            nullable=False,
+            comment="Hashed backup code",
+        ),
+        sa.Column(
+            "is_used",
+            sa.Boolean(),
+            nullable=False,
+            comment="Whether this backup code has been used",
+        ),
+        sa.Column(
+            "used_at",
+            sa.DateTime(timezone=True),
+            nullable=True,
+            comment="When this backup code was used",
+        ),
+        sa.Column(
+            "used_from_ip",
+            sa.String(length=45),
+            nullable=True,
+            comment="IP address from which the code was used",
+        ),
+        sa.Column(
+            "generated_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            comment="When this backup code was generated",
+        ),
+        sa.Column(
+            "expires_at",
+            sa.DateTime(timezone=True),
+            nullable=True,
+            comment="When this backup code expires (optional)",
+        ),
+        sa.Column("id", sa.UUID(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
+        sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("id"),
+    )
+    op.create_index(
+        "idx_mfa_backup_expires", "mfa_backup_codes", ["expires_at"], unique=False
+    )
+    op.create_index(
+        "idx_mfa_backup_generated", "mfa_backup_codes", ["generated_at"], unique=False
+    )
+    op.create_index(
+        "idx_mfa_backup_user_active",
+        "mfa_backup_codes",
+        ["user_id", "is_used"],
+        unique=False,
+    )
+    op.create_index(
+        op.f("ix_mfa_backup_codes_user_id"),
+        "mfa_backup_codes",
+        ["user_id"],
+        unique=False,
+    )
+    op.create_table(
         "organization_members",
         sa.Column("user_id", sa.UUID(), nullable=False, comment="User ID"),
         sa.Column(
@@ -748,6 +817,11 @@ def downgrade() -> None:
     op.drop_index("idx_org_member_status", table_name="organization_members")
     op.drop_index("idx_org_member_role", table_name="organization_members")
     op.drop_table("organization_members")
+    op.drop_index(op.f("ix_mfa_backup_codes_user_id"), table_name="mfa_backup_codes")
+    op.drop_index("idx_mfa_backup_user_active", table_name="mfa_backup_codes")
+    op.drop_index("idx_mfa_backup_generated", table_name="mfa_backup_codes")
+    op.drop_index("idx_mfa_backup_expires", table_name="mfa_backup_codes")
+    op.drop_table("mfa_backup_codes")
     op.drop_index(op.f("ix_users_username"), table_name="users")
     op.drop_index(op.f("ix_users_last_activity_at"), table_name="users")
     op.drop_index(op.f("ix_users_external_id"), table_name="users")
