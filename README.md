@@ -2,24 +2,26 @@
 
 ![Smithy Banner](.github/assets/banner.png)
 
-A minimalist, backend-focused project and task management platform built for developers.
+A modern, full-stack project and task management platform built for developers and teams.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.13+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
+[![Node.js 20+](https://img.shields.io/badge/node.js-20+-green.svg)](https://nodejs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.114+-00a393.svg)](https://fastapi.tiangolo.com)
+[![Next.js](https://img.shields.io/badge/Next.js-15+-black.svg)](https://nextjs.org/)
 [![Linted with Ruff](https://img.shields.io/badge/linting-ruff-blue)](https://docs.astral.sh/ruff/)
-[![CI](https://github.com/Anvoria/smithy-backend/actions/workflows/ci.yml/badge.svg)](https://github.com/Anvoria/smithy-backend/actions/workflows/ci.yml)
-
+[![CI](https://github.com/Anvoria/smithy/actions/workflows/ci.yml/badge.svg)](https://github.com/Anvoria/smithy/actions/workflows/ci.yml)
 
 ---
 
 ## ✨ Features
 
-- **Fast and lightweight** - Built with FastAPI and async SQLAlchemy for high performance.
-- **Developer-first** - Focused on providing a solid API for building custom tools.
-- **Secure** - JWT authentication for secure access.
-- **Modular architecture** - Easily extendable with plugins and custom endpoints.
-- **Scalable** - PostgreSQL backend with Alembic migrations for schema management.
+- **🚀 Fast and Modern** - FastAPI backend + Next.js frontend for optimal performance
+- **🔐 Secure by Default** - JWT authentication with MFA support (TOTP + backup codes)
+- **👥 Multi-tenant** - Organizations with role-based access control
+- **📊 Project Management** - Comprehensive project and task tracking
+- **🌐 API-First** - RESTful API with auto-generated OpenAPI documentation
+- **🔧 Developer-Friendly** - Built by developers, for developers
 
 ### Core Functionality
 
@@ -33,36 +35,81 @@ A minimalist, backend-focused project and task management platform built for dev
 
 ### Prerequisites
 
-- Python 3.13+
-- Docker & Docker Compose
-- PostgreSQL 15+ (if not using Docker)
-
+- **Docker & Docker Compose** (recommended)
+- **Python 3.13+** (for local backend development)
+- **Node.js 20+** (for local frontend development)
+- **PostgreSQL 15+** (if not using Docker)
+- 
 ### Quick Start
 
 ```bash
-# Clone the repo
-git clone https://github.com/Anvoria/smithy-backend.git
-cd smithy-backend
+# Clone the repository
+git clone https://github.com/Anvoria/smithy.git
+cd smithy
 
 # Copy environment variables
-cp .env.example .env
+cp backend/.env.example backend/.env
 
-# Start using Docker
+# Start the full stack
 docker-compose up --build
 
-# Alembic migrations
-docker-compose exec smithy_backend alembic upgrade head
+# The application will be available at:
+# - Backend API: http://localhost:8000
+# - API Documentation: http://localhost:8000/docs
+```
+
+### Local Development Setup
+
+#### Backend Setup
+
+```bash
+cd backend
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set up environment
+cp .env.example .env
+
+# Run database migrations
+alembic upgrade head
+
+# Start development server
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+#### Frontend Setup
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
 ```
 
 ---
 
 ## 🧪 Testing
 
+Coming soon!
+
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) for details on how to get started.
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on:
+
+- Setting up the development environment
+- Code style and formatting guidelines
+- Submitting pull requests
+- Reporting issues
 
 ---
 
