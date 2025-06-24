@@ -39,7 +39,7 @@ A modern, full-stack project and task management platform built for developers a
 - **Python 3.13+** (for local backend development)
 - **Node.js 20+** (for local frontend development)
 - **PostgreSQL 15+** (if not using Docker)
-- 
+
 ### Quick Start
 
 ```bash
