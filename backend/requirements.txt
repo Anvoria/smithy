@@ -21,6 +21,7 @@ Mako==1.3.10
 MarkupSafe==3.0.2
 packaging==25.0
 passlib==1.7.4
+pillow==11.2.1
 psutil==7.0.0
 psycopg2-binary==2.9.10
 pyasn1==0.6.1
@@ -28,8 +29,10 @@ pycparser==2.22
 pydantic==2.11.7
 pydantic-settings==2.9.1
 pydantic_core==2.33.2
+pyotp==2.9.0
 python-dotenv==1.1.0
 python-jose==3.5.0
+qrcode==8.2
 redis==6.2.0
 rsa==4.9.1
 six==1.17.0
