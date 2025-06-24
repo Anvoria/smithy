@@ -3,8 +3,8 @@ version: '3.9'
 services:
   smithy_backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: smithy_backend
     environment:
       - SMITHY_ENV=production
@@ -12,6 +12,8 @@ services:
       - REDIS_URL=redis://redis:6379/0
     env_file:
       - backend/.env
+    ports:
+      - "8000:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -31,6 +33,9 @@ services:
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./backend/scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U smithy -d smithy"]
       interval: 10s
@@ -43,6 +48,8 @@ services:
     image: redis:7-alpine
     container_name: smithy_redis
     restart: unless-stopped
+    ports:
+      - "6379:6379"
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
@@ -53,7 +60,6 @@ services:
 
 volumes:
   postgres_data:
-  pgadmin_data:
 
 networks:
   smithy_network:
