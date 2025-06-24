@@ -55,6 +55,8 @@ class MFAService:
         :return: MFASetupResponse with secret, QR code, and backup codes
         """
         user = await self._get_user_and_verify_password(user_id, setup_data.password)
+        if user.mfa_enabled:
+            raise ValidationException("MFA is already enabled for this user")
 
         secret = pyotp.random_base32()
 
