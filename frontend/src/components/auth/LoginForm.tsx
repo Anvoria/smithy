@@ -43,7 +43,7 @@ export default function LoginForm() {
     useEffect(() => {
         const savedEmail = AuthService.getRememberedEmail();
         if (savedEmail) {
-            setFormData(prev => ({
+            setFormData((prev) => ({
                 ...prev,
                 email: savedEmail,
                 remember_me: true,
@@ -131,7 +131,10 @@ export default function LoginForm() {
             }
         } catch (error) {
             setErrors({
-                general: error instanceof Error ? error.message : 'MFA verification failed. Please try again.',
+                general:
+                    error instanceof Error
+                        ? error.message
+                        : 'MFA verification failed. Please try again.',
             });
         } finally {
             setIsLoading(false);
@@ -139,14 +142,14 @@ export default function LoginForm() {
     };
 
     const handleFieldChange = (field: keyof LoginFormState, value: string | boolean) => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             [field]: value,
         }));
 
         // Clear field-specific errors
         if (errors[field as keyof LoginErrors]) {
-            setErrors(prev => {
+            setErrors((prev) => {
                 const newErrors = { ...prev };
                 delete newErrors[field as keyof LoginErrors];
                 return newErrors;
@@ -157,7 +160,7 @@ export default function LoginForm() {
     const handleBackToLogin = () => {
         setRequiresMFA(false);
         setPartialAuthToken(null);
-        setFormData(prev => ({ ...prev, mfa_code: '' }));
+        setFormData((prev) => ({ ...prev, mfa_code: '' }));
         setErrors({});
     };
 
@@ -169,7 +172,6 @@ export default function LoginForm() {
             } else {
                 handleInitialLogin();
             }
-
         }
     };
 
@@ -186,8 +188,12 @@ export default function LoginForm() {
                             isLoading={isLoading}
                             showPassword={showPassword}
                             onEmailChange={(email: string) => handleFieldChange('email', email)}
-                            onPasswordChange={(password: string) => handleFieldChange('password', password)}
-                            onRememberMeChange={(checked: boolean) => handleFieldChange('remember_me', checked)}
+                            onPasswordChange={(password: string) =>
+                                handleFieldChange('password', password)
+                            }
+                            onRememberMeChange={(checked: boolean) =>
+                                handleFieldChange('remember_me', checked)
+                            }
                             onPasswordToggle={() => setShowPassword(!showPassword)}
                             onSubmit={handleInitialLogin}
                             onKeyDown={handleKeyDown}

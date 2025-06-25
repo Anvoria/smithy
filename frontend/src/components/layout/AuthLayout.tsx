@@ -55,8 +55,8 @@ export function AuthLayout({ children }: AuthLayoutProps) {
                                 className="w-8 h-8"
                             />
                             <span className="font-machina text-2xl font-black text-white">
-                Smithy
-              </span>
+                                Smithy
+                            </span>
                         </div>
                     </div>
 

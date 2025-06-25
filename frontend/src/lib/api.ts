@@ -1,4 +1,4 @@
-import {GenericApiError, GenericApiErrorData} from "@/types/auth";
+import { GenericApiError, GenericApiErrorData } from '@/types/auth';
 
 class ApiClient {
     private readonly baseURL: string;

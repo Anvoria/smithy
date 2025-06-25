@@ -24,35 +24,29 @@ interface EmailPasswordStepProps {
 }
 
 export function EmailPasswordStep({
-                                      email,
-                                      password,
-                                      rememberMe,
-                                      errors,
-                                      isLoading,
-                                      showPassword,
-                                      onEmailChange,
-                                      onPasswordChange,
-                                      onRememberMeChange,
-                                      onPasswordToggle,
-                                      onSubmit,
-                                      onKeyDown,
-                                  }: EmailPasswordStepProps) {
+    email,
+    password,
+    rememberMe,
+    errors,
+    isLoading,
+    showPassword,
+    onEmailChange,
+    onPasswordChange,
+    onRememberMeChange,
+    onPasswordToggle,
+    onSubmit,
+    onKeyDown,
+}: EmailPasswordStepProps) {
     return (
         <div>
             {/* Header */}
             <div className="mb-8">
-                <h2 className="font-machina text-3xl font-medium text-white mb-2">
-                    Login
-                </h2>
-                <p className="text-[var(--ash-gray)] text-sm">
-                    Enter your credentials
-                </p>
+                <h2 className="font-machina text-3xl font-medium text-white mb-2">Login</h2>
+                <p className="text-[var(--ash-gray)] text-sm">Enter your credentials</p>
             </div>
 
             {/* General Error */}
-            {errors.general && (
-                <ErrorMessage message={errors.general} className="mb-6" />
-            )}
+            {errors.general && <ErrorMessage message={errors.general} className="mb-6" />}
 
             {/* Form */}
             <form onSubmit={onSubmit} onKeyDown={onKeyDown} className="space-y-5">

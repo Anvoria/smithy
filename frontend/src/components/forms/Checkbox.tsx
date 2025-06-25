@@ -31,8 +31,8 @@ export function Checkbox({ checked, onChange, label, disabled = false }: Checkbo
                 </div>
             </div>
             <span className="ml-3 text-[var(--ash-gray)] group-hover:text-white transition-colors">
-        {label}
-      </span>
+                {label}
+            </span>
         </label>
     );
 }

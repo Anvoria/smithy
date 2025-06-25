@@ -68,11 +68,11 @@ The frontend implements a comprehensive authentication system:
 import { AuthGuard } from '@/components/auth/AuthGuard';
 
 export default function ProtectedPage() {
-  return (
-    <AuthGuard>
-      <div>This content requires authentication</div>
-    </AuthGuard>
-  );
+    return (
+        <AuthGuard>
+            <div>This content requires authentication</div>
+        </AuthGuard>
+    );
 }
 ```
 
@@ -87,6 +87,7 @@ The project uses a custom design system built with:
 - **Component-based Design** - Reusable UI components
 
 ### Theme Colors
+
 - **Charcoal Black** (`--charcoal-black`) - Primary background
 - **Coal Shadow** (`--coal-shadow`) - Secondary background
 - **Forge Orange** (`--forge-orange`) - Brand accent

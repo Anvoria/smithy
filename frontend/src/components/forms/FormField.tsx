@@ -18,28 +18,26 @@ interface FormFieldProps {
 import { Eye, EyeOff } from 'lucide-react';
 
 export function FormField({
-                              label,
-                              type = 'text',
-                              value,
-                              onChange,
-                              placeholder,
-                              error,
-                              disabled = false,
-                              autoFocus = false,
-                              autoComplete,
-                              maxLength,
-                              className = '',
-                              showPasswordToggle = false,
-                              showPassword = false,
-                              onPasswordToggle,
-                          }: FormFieldProps) {
+    label,
+    type = 'text',
+    value,
+    onChange,
+    placeholder,
+    error,
+    disabled = false,
+    autoFocus = false,
+    autoComplete,
+    maxLength,
+    className = '',
+    showPasswordToggle = false,
+    showPassword = false,
+    onPasswordToggle,
+}: FormFieldProps) {
     const inputType = type === 'password' && showPassword ? 'text' : type;
 
     return (
         <div>
-            <label className="block text-[var(--ash-gray)] text-sm mb-2">
-                {label}
-            </label>
+            <label className="block text-[var(--ash-gray)] text-sm mb-2">{label}</label>
             <div className="relative">
                 <input
                     type={inputType}
@@ -71,9 +69,7 @@ export function FormField({
                     </button>
                 )}
             </div>
-            {error && (
-                <p className="mt-1 text-[var(--molten-red)] text-xs">{error}</p>
-            )}
+            {error && <p className="mt-1 text-[var(--molten-red)] text-xs">{error}</p>}
         </div>
     );
 }

@@ -1,4 +1,4 @@
-import {AuthGuard} from "@/components/auth/AuthGuard";
+import { AuthGuard } from '@/components/auth/AuthGuard';
 
 export default function Home() {
     return (
@@ -8,5 +8,5 @@ export default function Home() {
                 <p className="text-lg">This is a protected route.</p>
             </div>
         </AuthGuard>
-    )
+    );
 }

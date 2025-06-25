@@ -12,20 +12,22 @@ interface ButtonProps {
 }
 
 export function Button({
-                           children,
-                           type = 'button',
-                           variant = 'primary',
-                           disabled = false,
-                           loading = false,
-                           onClick,
-                           className = '',
-                           fullWidth = false,
-                       }: ButtonProps) {
-    const baseClasses = "p-3 font-machina font-medium rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100";
+    children,
+    type = 'button',
+    variant = 'primary',
+    disabled = false,
+    loading = false,
+    onClick,
+    className = '',
+    fullWidth = false,
+}: ButtonProps) {
+    const baseClasses =
+        'p-3 font-machina font-medium rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100';
 
     const variantClasses = {
-        primary: "bg-[var(--forge-orange)] text-[var(--charcoal-black)] hover:bg-[var(--spark-yellow)] hover:scale-[1.02]",
-        secondary: "bg-[var(--coal-shadow)] text-white hover:bg-[var(--iron-gray)]"
+        primary:
+            'bg-[var(--forge-orange)] text-[var(--charcoal-black)] hover:bg-[var(--spark-yellow)] hover:scale-[1.02]',
+        secondary: 'bg-[var(--coal-shadow)] text-white hover:bg-[var(--iron-gray)]',
     };
 
     const widthClass = fullWidth ? 'w-full' : '';

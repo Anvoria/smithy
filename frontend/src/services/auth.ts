@@ -8,7 +8,8 @@ import {
     LogoutRequest,
     MFARequiredResponse,
     MFALoginRequest,
-    ApiResponse, GenericApiError,
+    ApiResponse,
+    GenericApiError,
 } from '@/types/auth';
 
 function isMFARequiredErrorResponse(error: GenericApiError): error is GenericApiError & {
@@ -16,8 +17,8 @@ function isMFARequiredErrorResponse(error: GenericApiError): error is GenericApi
         details: {
             required_mfa: true;
             partial_auth_token: string;
-        }
-    }
+        };
+    };
 } {
     return (
         error.responseData?.details?.required_mfa === true &&
@@ -80,7 +81,6 @@ export class AuthService {
             throw error;
         }
     }
-
 
     static async completeMFALogin(data: MFALoginRequest): Promise<TokenResponse> {
         const response = await apiClient.post<TokenResponse>('/auth/mfa/complete', data);

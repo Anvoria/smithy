@@ -1,13 +1,13 @@
 'use client';
 
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import {useAuth} from '@/contexts/AuthContext';
-import {RegisterRequest} from '@/types/auth';
-import {AuthLayout} from '@/components/layout/AuthLayout';
-import {FormField} from '@/components/forms/FormField';
-import {Button} from '@/components/forms/Button';
-import {ErrorMessage} from '@/components/ui/ErrorMessage';
+import { useAuth } from '@/contexts/AuthContext';
+import { RegisterRequest } from '@/types/auth';
+import { AuthLayout } from '@/components/layout/AuthLayout';
+import { FormField } from '@/components/forms/FormField';
+import { Button } from '@/components/forms/Button';
+import { ErrorMessage } from '@/components/ui/ErrorMessage';
 
 interface RegisterFormState {
     email: string;
@@ -49,7 +49,7 @@ export default function RegisterForm() {
             uppercase: /[A-Z]/.test(password),
             lowercase: /[a-z]/.test(password),
             digit: /\d/.test(password),
-            special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+            special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
         };
     };
 
@@ -78,7 +78,8 @@ export default function RegisterForm() {
             if (!checks.length) {
                 newErrors.password = 'Password must be at least 8 characters long';
             } else if (!checks.uppercase || !checks.lowercase || !checks.digit || !checks.special) {
-                newErrors.password = 'Password must contain uppercase, lowercase, digit, and special character';
+                newErrors.password =
+                    'Password must contain uppercase, lowercase, digit, and special character';
             }
         }
 
@@ -101,14 +102,14 @@ export default function RegisterForm() {
     };
 
     const handleFieldChange = (field: keyof RegisterFormState, value: string) => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             [field]: value,
         }));
 
         // Clear field-specific errors
         if (errors[field as keyof RegisterErrors]) {
-            setErrors(prev => {
+            setErrors((prev) => {
                 const newErrors = { ...prev };
                 delete newErrors[field as keyof RegisterErrors];
                 return newErrors;
@@ -116,15 +117,19 @@ export default function RegisterForm() {
         }
 
         // Clear confirm password error if passwords now match
-        if (field === 'password' && formData.confirmPassword && value === formData.confirmPassword) {
-            setErrors(prev => {
+        if (
+            field === 'password' &&
+            formData.confirmPassword &&
+            value === formData.confirmPassword
+        ) {
+            setErrors((prev) => {
                 const newErrors = { ...prev };
                 delete newErrors.confirmPassword;
                 return newErrors;
             });
         }
         if (field === 'confirmPassword' && formData.password && value === formData.password) {
-            setErrors(prev => {
+            setErrors((prev) => {
                 const newErrors = { ...prev };
                 delete newErrors.confirmPassword;
                 return newErrors;
@@ -149,7 +154,10 @@ export default function RegisterForm() {
             await register(registerData);
         } catch (error) {
             setErrors({
-                general: error instanceof Error ? error.message : 'Registration failed. Please try again.',
+                general:
+                    error instanceof Error
+                        ? error.message
+                        : 'Registration failed. Please try again.',
             });
         } finally {
             setIsLoading(false);
@@ -172,15 +180,11 @@ export default function RegisterForm() {
                     <h2 className="font-machina text-3xl font-medium text-white mb-2">
                         Create Account
                     </h2>
-                    <p className="text-[var(--ash-gray)] text-sm">
-                        Set up your workspace
-                    </p>
+                    <p className="text-[var(--ash-gray)] text-sm">Set up your workspace</p>
                 </div>
 
                 {/* General Error */}
-                {errors.general && (
-                    <ErrorMessage message={errors.general} className="mb-6" />
-                )}
+                {errors.general && <ErrorMessage message={errors.general} className="mb-6" />}
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="space-y-5">
@@ -242,10 +246,15 @@ export default function RegisterForm() {
                         <div className="space-y-2">
                             <div className="flex items-center justify-between text-xs">
                                 <span className="text-[var(--ash-gray)]">Password strength:</span>
-                                <span className={`font-medium ${
-                                    passwordStrength.level === 'weak' ? 'text-red-400' :
-                                        passwordStrength.level === 'medium' ? 'text-yellow-400' : 'text-green-400'
-                                }`}>
+                                <span
+                                    className={`font-medium ${
+                                        passwordStrength.level === 'weak'
+                                            ? 'text-red-400'
+                                            : passwordStrength.level === 'medium'
+                                              ? 'text-yellow-400'
+                                              : 'text-green-400'
+                                    }`}
+                                >
                                     {passwordStrength.text}
                                 </span>
                             </div>
@@ -253,21 +262,31 @@ export default function RegisterForm() {
                                 <div
                                     className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
                                     style={{
-                                        width: `${(Object.values(validatePasswordStrength(formData.password)).filter(Boolean).length / 5) * 100}%`
+                                        width: `${(Object.values(validatePasswordStrength(formData.password)).filter(Boolean).length / 5) * 100}%`,
                                     }}
                                 />
                             </div>
                             <div className="text-xs text-[var(--ash-gray)]">
                                 <p>Password requirements:</p>
                                 <div className="grid grid-cols-2 gap-1 mt-1">
-                                    {Object.entries(validatePasswordStrength(formData.password)).map(([key, valid]) => (
-                                        <div key={key} className={`flex items-center ${valid ? 'text-green-400' : 'text-red-400'}`}>
+                                    {Object.entries(
+                                        validatePasswordStrength(formData.password)
+                                    ).map(([key, valid]) => (
+                                        <div
+                                            key={key}
+                                            className={`flex items-center ${valid ? 'text-green-400' : 'text-red-400'}`}
+                                        >
                                             <span className="mr-1">{valid ? '✓' : '✗'}</span>
                                             <span className="text-xs">
-                                                {key === 'length' ? '8+ characters' :
-                                                    key === 'uppercase' ? 'Uppercase' :
-                                                        key === 'lowercase' ? 'Lowercase' :
-                                                            key === 'digit' ? 'Number' : 'Special char'}
+                                                {key === 'length'
+                                                    ? '8+ characters'
+                                                    : key === 'uppercase'
+                                                      ? 'Uppercase'
+                                                      : key === 'lowercase'
+                                                        ? 'Lowercase'
+                                                        : key === 'digit'
+                                                          ? 'Number'
+                                                          : 'Special char'}
                                             </span>
                                         </div>
                                     ))}
@@ -294,11 +313,17 @@ export default function RegisterForm() {
                     {/* Terms and Privacy */}
                     <div className="text-xs text-[var(--ash-gray)] leading-relaxed">
                         By creating an account, you agree to our{' '}
-                        <Link href="/terms" className="text-[var(--forge-orange)] hover:text-[var(--spark-yellow)] transition-colors">
+                        <Link
+                            href="/terms"
+                            className="text-[var(--forge-orange)] hover:text-[var(--spark-yellow)] transition-colors"
+                        >
                             Terms of Service
                         </Link>{' '}
                         and{' '}
-                        <Link href="/privacy" className="text-[var(--forge-orange)] hover:text-[var(--spark-yellow)] transition-colors">
+                        <Link
+                            href="/privacy"
+                            className="text-[var(--forge-orange)] hover:text-[var(--spark-yellow)] transition-colors"
+                        >
                             Privacy Policy
                         </Link>
                     </div>

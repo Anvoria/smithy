@@ -14,15 +14,15 @@ interface MFAStepProps {
 }
 
 export function MFAStep({
-                            mfaCode,
-                            error,
-                            generalError,
-                            isLoading,
-                            onMfaCodeChange,
-                            onSubmit,
-                            onBack,
-                            onKeyDown,
-                        }: MFAStepProps) {
+    mfaCode,
+    error,
+    generalError,
+    isLoading,
+    onMfaCodeChange,
+    onSubmit,
+    onBack,
+    onKeyDown,
+}: MFAStepProps) {
     const handleMfaCodeChange = (value: string) => {
         // Only allow digits, max 6 characters
         const cleanValue = value.replace(/\D/g, '').slice(0, 6);
@@ -42,9 +42,7 @@ export function MFAStep({
             </div>
 
             {/* General Error */}
-            {generalError && (
-                <ErrorMessage message={generalError} className="mb-6" />
-            )}
+            {generalError && <ErrorMessage message={generalError} className="mb-6" />}
 
             {/* Form */}
             <form onSubmit={onSubmit} onKeyDown={onKeyDown} className="space-y-5">
