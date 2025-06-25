@@ -1,26 +1,56 @@
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@400&display=swap');
 @import "tailwindcss";
+@import '../styles/fonts.css';
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --forge-orange: #F18424;
+  --charcoal-black: #0D0D0D;
+  --iron-gray: #2E2E2E;
+  --ash-gray: #A2A2A2;
+  --coal-shadow: #1A1A1A;
+  --spark-yellow: #FFCE5B;
+  --molten-red: #D9481F;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--charcoal-black);
+  font-family: 'Satoshi', sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+.font-machina {
+  font-family: 'PP Neue Machina Inktrap', sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--coal-shadow);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--iron-gray);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--forge-orange);
+}
+
+/* Selection */
+::selection {
+  background-color: var(--forge-orange);
+  color: var(--charcoal-black);
 }

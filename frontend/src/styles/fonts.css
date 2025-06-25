@@ -1,0 +1,61 @@
+/* PP Neue Machina Inktrap - Regular */
+@font-face {
+    font-family: 'PP Neue Machina Inktrap';
+    src: url('/fonts/pp-neue-machina/PPNeueMachina-InktrapRegular.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* PP Neue Machina Inktrap - Ultrabold */
+@font-face {
+    font-family: 'PP Neue Machina Inktrap';
+    src: url('/fonts/pp-neue-machina/PPNeueMachina-InktrapUltrabold.otf') format('opentype');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* PP Neue Machina Plain - Light */
+@font-face {
+    font-family: 'PP Neue Machina Plain';
+    src: url('/fonts/pp-neue-machina/PPNeueMachina-PlainLight.otf') format('opentype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* PP Neue Machina Plain - Regular */
+@font-face {
+    font-family: 'PP Neue Machina Plain';
+    src: url('/fonts/pp-neue-machina/PPNeueMachina-PlainRegular.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* PP Neue Machina Plain - Ultrabold */
+@font-face {
+    font-family: 'PP Neue Machina Plain';
+    src: url('/fonts/pp-neue-machina/PPNeueMachina-PlainUltrabold.otf') format('opentype');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Aliases for easier usage */
+@font-face {
+    font-family: 'PP Neue Machina';
+    src: url('/fonts/pp-neue-machina/PPNeueMachina-InktrapRegular.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'PP Neue Machina';
+    src: url('/fonts/pp-neue-machina/PPNeueMachina-InktrapUltrabold.otf') format('opentype');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
