@@ -1,36 +1,141 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Smithy Frontend
 
-## Getting Started
+Built with **Next.js 15**, **React 19**, and **TypeScript** for a fast, responsive user experience.
 
-First, run the development server:
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Node.js 20+**
+- **npm** (comes with Node.js)
+
+### Development Setup
 
 ```bash
+# Navigate to frontend directory
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start development server with Turbopack
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# The application will be available at:
+# http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Available Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Development
+npm run dev          # Start development server with Turbopack
+npm run build        # Build for production
+npm run start        # Start production server
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Code Quality
+npm run lint         # Run ESLint
+npm run lint:fix     # Fix ESLint issues automatically
+npm run format       # Format code with Prettier
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🔐 Authentication System
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The frontend implements a comprehensive authentication system:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Components
 
-## Deploy on Vercel
+- **AuthGuard** - Protects routes requiring authentication
+- **GuestGuard** - Redirects authenticated users away from auth pages
+- ~~**RoleGuard** - Protects routes based on user roles~~ (soon™️)
+- **LoginForm** - Multi-step login with email/password and MFA support
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Features
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- JWT token management (access + refresh tokens)
+- Multi-factor authentication (TOTP)
+- Remember me functionality
+- Automatic token refresh
+- Route protection and redirection
+
+### Usage Example
+
+```tsx
+import { AuthGuard } from '@/components/auth/AuthGuard';
+
+export default function ProtectedPage() {
+  return (
+    <AuthGuard>
+      <div>This content requires authentication</div>
+    </AuthGuard>
+  );
+}
+```
+
+---
+
+## 🎨 Styling
+
+The project uses a custom design system built with:
+
+- **Tailwind CSS 4** - Utility-first CSS framework
+- **Custom CSS Variables** - Theme colors and spacing
+- **Component-based Design** - Reusable UI components
+
+### Theme Colors
+- **Charcoal Black** (`--charcoal-black`) - Primary background
+- **Coal Shadow** (`--coal-shadow`) - Secondary background
+- **Forge Orange** (`--forge-orange`) - Brand accent
+- **Ash Gray** (`--ash-gray`) - Text color
+
+---
+
+## 🧪 Development Guidelines
+
+### Code Style
+
+We use automated tools for consistent code quality:
+
+```bash
+# ESLint for code quality
+npm run lint
+
+# Prettier for formatting
+npm run format
+
+# Pre-commit hooks via Husky
+npm run prepare
+```
+
+### TypeScript
+
+- Strict mode enabled
+- Full type safety for API responses
+- Component prop validation
+
+## 🔗 Integration with Backend
+
+The frontend connects to the FastAPI backend running on port 8000.
+
+See the main [project README](../README.md) for full-stack setup instructions.
+
+---
+
+## 📝 Contributing
+
+Please see the main [Contributing Guide](../CONTRIBUTING.md) for:
+
+- Development environment setup
+- Code style guidelines
+- Submitting pull requests
+- Reporting issues
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
