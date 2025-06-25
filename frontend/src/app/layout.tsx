@@ -3,51 +3,54 @@ import './globals.css';
 import GlobalProviders from '@/app/providers';
 
 export const metadata: Metadata = {
-    title: "Smithy | Forge Your Workflow",
-    description: "A minimalist, atmospheric project management platform built for developers, freelancers, and builders who are tired of boring, bloated tools.",
+    title: 'Smithy | Forge Your Workflow',
+    description:
+        'A minimalist, atmospheric project management platform built for developers, freelancers, and builders who are tired of boring, bloated tools.',
     keywords: [
-        "project management",
-        "task management",
-        "developer tools",
-        "freelancer",
-        "productivity",
-        "open source",
-        "minimalist",
-        "workflow"
+        'project management',
+        'task management',
+        'developer tools',
+        'freelancer',
+        'productivity',
+        'open source',
+        'minimalist',
+        'workflow',
     ],
-    authors: [{ name: "Anvoria" }],
-    creator: "Smithy",
-    publisher: "Smithy",
+    authors: [{ name: 'Anvoria' }],
+    creator: 'Smithy',
+    publisher: 'Smithy',
     formatDetection: {
         email: false,
         address: false,
         telephone: false,
     },
-    metadataBase: new URL("https://smithy.sh"),
+    metadataBase: new URL('https://smithy.sh'),
     alternates: {
-        canonical: "/",
+        canonical: '/',
     },
     openGraph: {
-        title: "Smithy | Forge Your Workflow",
-        description: "A minimalist, atmospheric project management platform built for developers, freelancers, and builders.",
-        url: "https://smithy.sh",
-        siteName: "Smithy",
-        type: "website",
-        locale: "en_US",
+        title: 'Smithy | Forge Your Workflow',
+        description:
+            'A minimalist, atmospheric project management platform built for developers, freelancers, and builders.',
+        url: 'https://smithy.sh',
+        siteName: 'Smithy',
+        type: 'website',
+        locale: 'en_US',
         images: [
             {
-                url: "/og-image.jpg",
+                url: '/og-image.jpg',
                 width: 1200,
                 height: 630,
-                alt: "Smithy - Forge Your Workflow",
+                alt: 'Smithy - Forge Your Workflow',
             },
         ],
     },
     twitter: {
-        card: "summary_large_image",
-        title: "Smithy | Forge Your Workflow",
-        description: "A minimalist, atmospheric project management platform built for developers, freelancers, and builders.",
-        images: ["/og-image.jpg"],
+        card: 'summary_large_image',
+        title: 'Smithy | Forge Your Workflow',
+        description:
+            'A minimalist, atmospheric project management platform built for developers, freelancers, and builders.',
+        images: ['/og-image.jpg'],
     },
     robots: {
         index: true,
@@ -55,19 +58,17 @@ export const metadata: Metadata = {
         googleBot: {
             index: true,
             follow: true,
-            "max-video-preview": -1,
-            "max-image-preview": "large",
-            "max-snippet": -1,
+            'max-video-preview': -1,
+            'max-image-preview': 'large',
+            'max-snippet': -1,
         },
     },
     icons: {
         icon: [
-            { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-            { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+            { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+            { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
         ],
-        apple: [
-            { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-        ],
+        apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
     },
     // manifest: "/site.webmanifest",
 };
