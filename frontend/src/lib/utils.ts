@@ -1,5 +1,5 @@
 import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge'
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -14,5 +14,5 @@ export const forgeTheme = {
         shadow: '#1A1A1A',
         spark: '#FFCE5B',
         molten: '#D9481F',
-    }
+    },
 } as const;

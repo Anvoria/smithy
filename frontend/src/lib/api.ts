@@ -10,10 +10,7 @@ class ApiClient {
         return localStorage.getItem('smithy_access_token');
     }
 
-    async request<T>(
-        endpoint: string,
-        options: RequestInit = {}
-    ): Promise<T> {
+    async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
         const url = `${this.baseURL}/v1${endpoint}`;
         const token = this.getAuthToken();
 
@@ -31,7 +28,9 @@ class ApiClient {
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `HTTP ${response.status}`);
+                const error = new Error(errorData.message || `Request failed`);
+                (error as any).responseData = errorData
+                throw error;
             }
 
             return await response.json();
@@ -46,7 +45,7 @@ class ApiClient {
         return this.request<T>(endpoint, { method: 'GET', ...options });
     }
 
-    async post<T>(endpoint: string, data?: any, options?: RequestInit): Promise<T> {
+    async post<T, D = unknown>(endpoint: string, data?: D, options?: RequestInit): Promise<T> {
         return this.request<T>(endpoint, {
             method: 'POST',
             body: data ? JSON.stringify(data) : undefined,
@@ -54,7 +53,7 @@ class ApiClient {
         });
     }
 
-    async put<T>(endpoint: string, data?: any, options?: RequestInit): Promise<T> {
+    async put<T, D = unknown>(endpoint: string, data?: D, options?: RequestInit): Promise<T> {
         return this.request<T>(endpoint, {
             method: 'PUT',
             body: data ? JSON.stringify(data) : undefined,
@@ -62,7 +61,7 @@ class ApiClient {
         });
     }
 
-    async patch<T>(endpoint: string, data?: any, options?: RequestInit): Promise<T> {
+    async patch<T, D = unknown>(endpoint: string, data?: D, options?: RequestInit): Promise<T> {
         return this.request<T>(endpoint, {
             method: 'PATCH',
             body: data ? JSON.stringify(data) : undefined,

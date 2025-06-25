@@ -8,7 +8,7 @@ import {
     LogoutRequest,
     MFARequiredResponse,
     MFALoginRequest,
-    ApiResponse
+    ApiResponse,
 } from '@/types/auth';
 
 export class AuthService {
@@ -50,16 +50,25 @@ export class AuthService {
     }
 
     static async login(data: LoginRequest): Promise<TokenResponse | MFARequiredResponse> {
-        const response = await apiClient.post<TokenResponse | MFARequiredResponse>('/auth/login', data);
+        try {
+            const response = await apiClient.post<TokenResponse>('/auth/login', data);
 
-        // Check if response indicates MFA is required
-        if ('requires_mfa' in response && response.requires_mfa) {
-            return response as MFARequiredResponse;
+            this.setAuth(response);
+            return response;
+
+        } catch (error: any) {
+            const responseData = error.responseData;
+
+            if (responseData?.details?.required_mfa) {
+                return {
+                    requires_mfa: true,
+                    message: responseData.message,
+                    partial_auth_token: responseData.details.partial_auth_token
+                };
+            }
+
+            throw error;
         }
-
-        const tokenResponse = response as TokenResponse;
-        this.setAuth(tokenResponse);
-        return tokenResponse;
     }
 
     static async completeMFALogin(data: MFALoginRequest): Promise<TokenResponse> {

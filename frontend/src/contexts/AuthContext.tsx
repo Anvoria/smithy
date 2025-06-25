@@ -9,7 +9,7 @@ import {
     RegisterRequest,
     TokenResponse,
     MFARequiredResponse,
-    MFALoginRequest
+    MFALoginRequest,
 } from '@/types/auth';
 
 interface AuthContextType extends AuthState {
@@ -67,14 +67,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
 
     const login = async (data: LoginRequest): Promise<TokenResponse | MFARequiredResponse> => {
-        setState(prev => ({ ...prev, isLoading: true }));
+        setState((prev) => ({ ...prev, isLoading: true }));
 
         try {
             const response = await AuthService.login(data);
 
-            // Check if MFA is required
+            console.log('Login response:', response);
             if ('requires_mfa' in response && response.requires_mfa) {
-                setState(prev => ({ ...prev, isLoading: false }));
+                setState((prev) => ({ ...prev, isLoading: false }));
                 return response;
             }
 
@@ -98,7 +98,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
 
     const completeMFALogin = async (data: MFALoginRequest): Promise<TokenResponse> => {
-        setState(prev => ({ ...prev, isLoading: true }));
+        setState((prev) => ({ ...prev, isLoading: true }));
 
         try {
             const response = await AuthService.completeMFALogin(data);
@@ -121,7 +121,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
 
     const register = async (data: RegisterRequest): Promise<TokenResponse> => {
-        setState(prev => ({ ...prev, isLoading: true }));
+        setState((prev) => ({ ...prev, isLoading: true }));
 
         try {
             const response = await AuthService.register(data);
@@ -144,7 +144,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
 
     const logout = async () => {
-        setState(prev => ({ ...prev, isLoading: true }));
+        setState((prev) => ({ ...prev, isLoading: true }));
 
         try {
             await AuthService.logout();
@@ -202,7 +202,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         </AuthContext.Provider>
     );
 }
-
 
 export function useAuth() {
     const context = useContext(AuthContext);
