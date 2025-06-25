@@ -8,8 +8,22 @@ import {
     LogoutRequest,
     MFARequiredResponse,
     MFALoginRequest,
-    ApiResponse,
+    ApiResponse, GenericApiError,
 } from '@/types/auth';
+
+function isMFARequiredErrorResponse(error: GenericApiError): error is GenericApiError & {
+    responseData: {
+        details: {
+            required_mfa: true;
+            partial_auth_token: string;
+        }
+    }
+} {
+    return (
+        error.responseData?.details?.required_mfa === true &&
+        typeof error.responseData?.details?.partial_auth_token === 'string'
+    );
+}
 
 export class AuthService {
     private static ACCESS_TOKEN_KEY = 'smithy_access_token';
@@ -52,24 +66,21 @@ export class AuthService {
     static async login(data: LoginRequest): Promise<TokenResponse | MFARequiredResponse> {
         try {
             const response = await apiClient.post<TokenResponse>('/auth/login', data);
-
             this.setAuth(response);
             return response;
-
-        } catch (error: any) {
-            const responseData = error.responseData;
-
-            if (responseData?.details?.required_mfa) {
+        } catch (error: unknown) {
+            if (error instanceof GenericApiError && isMFARequiredErrorResponse(error)) {
                 return {
                     requires_mfa: true,
-                    message: responseData.message,
-                    partial_auth_token: responseData.details.partial_auth_token
+                    message: error.responseData.message || 'MFA required',
+                    partial_auth_token: error.responseData.details.partial_auth_token,
                 };
             }
 
             throw error;
         }
     }
+
 
     static async completeMFALogin(data: MFALoginRequest): Promise<TokenResponse> {
         const response = await apiClient.post<TokenResponse>('/auth/mfa/complete', data);

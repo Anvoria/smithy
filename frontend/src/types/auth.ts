@@ -67,6 +67,14 @@ export interface AuthState {
     isLoading: boolean;
 }
 
+export interface MFARequiredErrorResponse {
+    message: string;
+    details: {
+        required_mfa: true;
+        partial_auth_token: string;
+    };
+}
+
 // API Response wrappers
 export interface ApiResponse<T> {
     success: boolean;
@@ -81,5 +89,25 @@ export interface ApiError {
     code: string;
     status_code: number;
     timestamp: string;
-    details?: any;
+    details?: Record<string, unknown>;
+}
+
+export interface GenericApiErrorData {
+    message?: string;
+    details?: {
+        required_mfa?: boolean;
+        partial_auth_token?: string;
+        [key: string]: unknown;
+    };
+    [key: string]: unknown;
+}
+
+export class GenericApiError extends Error {
+    responseData: GenericApiErrorData;
+
+    constructor(message: string, responseData: GenericApiErrorData) {
+        super(message);
+        this.name = 'GenericApiError';
+        this.responseData = responseData;
+    }
 }

@@ -4,7 +4,6 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { AuthService } from '@/services/auth';
 import {
     AuthState,
-    User,
     LoginRequest,
     RegisterRequest,
     TokenResponse,
@@ -72,7 +71,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         try {
             const response = await AuthService.login(data);
 
-            console.log('Login response:', response);
             if ('requires_mfa' in response && response.requires_mfa) {
                 setState((prev) => ({ ...prev, isLoading: false }));
                 return response;

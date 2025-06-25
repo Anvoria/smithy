@@ -74,9 +74,7 @@ export default function LoginForm() {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleInitialLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-
+    const handleInitialLogin = async () => {
         if (!validateForm()) return;
 
         setIsLoading(true);
@@ -113,9 +111,7 @@ export default function LoginForm() {
         }
     };
 
-    const handleMFALogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-
+    const handleMFALogin = async () => {
         if (!validateForm(true) || !partialAuthToken) return;
 
         setIsLoading(true);
@@ -167,11 +163,13 @@ export default function LoginForm() {
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !isLoading) {
+            e.preventDefault();
             if (requiresMFA) {
-                handleMFALogin(e as any);
+                handleMFALogin();
             } else {
-                handleInitialLogin(e as any);
+                handleInitialLogin();
             }
+
         }
     };
 

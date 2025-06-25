@@ -1,3 +1,5 @@
+import {GenericApiError, GenericApiErrorData} from "@/types/auth";
+
 class ApiClient {
     private readonly baseURL: string;
 
@@ -27,10 +29,8 @@ class ApiClient {
             const response = await fetch(url, config);
 
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                const error = new Error(errorData.message || `Request failed`);
-                (error as any).responseData = errorData
-                throw error;
+                const errorData: GenericApiErrorData = await response.json().catch(() => ({}));
+                throw new GenericApiError(errorData.message || `Request failed`, errorData);
             }
 
             return await response.json();
