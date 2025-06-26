@@ -4,7 +4,12 @@ from typing import Optional, Dict, Annotated
 
 from pydantic import BaseModel, Field, field_validator, computed_field
 
-from app.models.project import ProjectStatus, ProjectPriority, ProjectVisibility
+from app.models.project import (
+    ProjectStatus,
+    ProjectPriority,
+    ProjectVisibility,
+    Project,
+)
 from app.models.project_member import ProjectRole
 
 
@@ -185,7 +190,7 @@ class ProjectResponse(BaseModel):
 
     # Organization
     organization_id: uuid.UUID
-    organization_slug: str = Field(alias="organization.slug")
+    organization_slug: Optional[str] = None
 
     # Lead
     lead_id: Optional[uuid.UUID]
@@ -298,6 +303,35 @@ class ProjectResponse(BaseModel):
     def full_key(self) -> str:
         """Get full project identifier with org"""
         return f"{self.organization_slug}/{self.key}"
+
+    @classmethod
+    def from_project(cls, project: Project) -> "ProjectResponse":
+        """Create response from project with safe relation access"""
+        return cls(
+            id=project.id,
+            name=project.name,
+            key=project.key,
+            description=project.description,
+            organization_id=project.organization_id,
+            organization_slug=project.organization.slug
+            if project.organization
+            else None,
+            lead_id=project.lead_id,
+            icon=project.icon,
+            color=project.color,
+            cover_image_url=project.cover_image_url,
+            status=project.status,
+            priority=project.priority,
+            visibility=project.visibility,
+            start_date=project.start_date,
+            due_date=project.due_date,
+            completed_at=project.completed_at,
+            enable_subtasks=project.enable_subtasks,
+            settings=project.settings,
+            created_at=project.created_at,
+            updated_at=project.updated_at,
+            archived_at=project.archived_at,
+        )
 
 
 class ProjectListItem(BaseModel):
