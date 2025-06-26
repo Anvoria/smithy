@@ -17,7 +17,6 @@ class ProjectSettings(BaseModel):
 
     # Workflow settings
     require_task_approval: bool = False
-    allow_subtasks: bool = True
     enable_time_tracking: bool = False
 
     # Notifications
