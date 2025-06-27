@@ -1,5 +1,6 @@
 {
-    "name": "frontend",
+    "name": "smithy-frontend",
+    "description": "Front-end application of Smithy task management platform built for developers and teams.",
     "version": "0.1.0",
     "private": true,
     "scripts": {
