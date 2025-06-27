@@ -9,7 +9,7 @@ Built with **Next.js 15**, **React 19**, and **TypeScript** for a fast, responsi
 ### Prerequisites
 
 - **Node.js 20+**
-- **npm** (comes with Node.js)
+- **pnpm** (you have to install it via npm using `npm install -g pnpm`)
 
 ### Development Setup
 
@@ -18,10 +18,10 @@ Built with **Next.js 15**, **React 19**, and **TypeScript** for a fast, responsi
 cd frontend
 
 # Install dependencies
-npm install
+pnpm install
 
 # Start development server with Turbopack
-npm run dev
+pnpm run dev
 
 # The application will be available at:
 # http://localhost:3000
@@ -31,14 +31,14 @@ npm run dev
 
 ```bash
 # Development
-npm run dev          # Start development server with Turbopack
-npm run build        # Build for production
-npm run start        # Start production server
+pnpm run dev          # Start development server with Turbopack
+pnpm run build        # Build for production
+pnpm run start        # Start production server
 
 # Code Quality
-npm run lint         # Run ESLint
-npm run lint:fix     # Fix ESLint issues automatically
-npm run format       # Format code with Prettier
+pnpm run lint         # Run ESLint
+pnpm run lint:fix     # Fix ESLint issues automatically
+pnpm run format       # Format code with Prettier
 ```
 
 ---
@@ -103,13 +103,13 @@ We use automated tools for consistent code quality:
 
 ```bash
 # ESLint for code quality
-npm run lint
+pnpm run lint
 
 # Prettier for formatting
-npm run format
+pnpm run format
 
 # Pre-commit hooks via Husky
-npm run prepare
+pnpm run prepare
 ```
 
 ### TypeScript
