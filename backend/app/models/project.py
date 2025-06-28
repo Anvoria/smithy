@@ -184,8 +184,7 @@ class Project(Base):
     # Relationships
     organization = relationship("Organization", back_populates="projects")
     lead = relationship("User", foreign_keys=[lead_id])
-    # tasks = relationship("Task", back_populates="project", cascade="all, delete-orphan") #TODO https://github.com/Anvoria/smithy/issues/7
-    tasks: list = []
+    tasks = relationship("Task", back_populates="project", cascade="all, delete-orphan")
     members = relationship(
         "ProjectMember", back_populates="project", cascade="all, delete-orphan"
     )
