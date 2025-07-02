@@ -142,14 +142,14 @@ class TaskAssigneeResponse(BaseModel):
     assigned_at: datetime
 
     # User info
-    user_name: Optional[str] = Field(None, alias="user.full_name")
-    user_email: str = Field(alias="user.email")
-    user_username: Optional[str] = Field(None, alias="user.username")
-    user_avatar_url: Optional[str] = Field(None, alias="user.avatar_url")
+    user_name: Optional[str] = None
+    user_email: str
+    user_username: Optional[str] = None
+    user_avatar_url: Optional[str] = None
 
     # Assigner info
     assigned_by: uuid.UUID
-    assigner_name: Optional[str] = Field(None, alias="assigner.full_name")
+    assigner_name: Optional[str] = None
 
 
 class TaskAssigneeCreate(BaseModel):
@@ -192,8 +192,8 @@ class TaskDependencyResponse(BaseModel):
     created_at: datetime
 
     # Related task info
-    blocking_task_title: Optional[str] = Field(None, alias="blocking_task.title")
-    blocked_task_title: Optional[str] = Field(None, alias="blocked_task.title")
+    blocking_task_title: Optional[str] = None
+    blocked_task_title: Optional[str] = None
 
 
 # ==========================================
@@ -234,9 +234,9 @@ class TaskCommentResponse(BaseModel):
 
     # Author info
     author_id: uuid.UUID
-    author_name: Optional[str] = Field(None, alias="author.full_name")
-    author_email: str = Field(alias="author.email")
-    author_avatar_url: Optional[str] = Field(None, alias="author.avatar_url")
+    author_name: Optional[str] = None
+    author_email: str
+    author_avatar_url: Optional[str] = None
 
     # Reply count
     @property
@@ -286,8 +286,8 @@ class TaskTimeLogResponse(BaseModel):
 
     # User info
     user_id: uuid.UUID
-    user_name: Optional[str] = Field(None, alias="user.full_name")
-    user_email: str = Field(alias="user.email")
+    user_name: Optional[str] = None
+    user_email: str
 
 
 # ==========================================
@@ -307,8 +307,8 @@ class TaskResponse(BaseModel):
 
     # Project info
     project_id: uuid.UUID
-    project_key: Optional[str] = Field(None, alias="project.key")
-    project_name: Optional[str] = Field(None, alias="project.name")
+    project_key: Optional[str] = None
+    project_name: Optional[str] = None
 
     # Hierarchy
     parent_task_id: Optional[uuid.UUID]
@@ -317,8 +317,10 @@ class TaskResponse(BaseModel):
     assignees: List[TaskAssigneeResponse] = Field(default_factory=list)
 
     reporter_id: uuid.UUID
-    reporter_name: Optional[str] = Field(None, alias="reporter.full_name")
-    reporter_email: str = Field(alias="reporter.email")
+    reporter_name: Optional[str] = None
+    reporter_email: Optional[str] = (
+        None  # This field is required, it will be populated by the backend
+    )
 
     # Classification
     status: TaskStatus
@@ -414,7 +416,7 @@ class TaskListItem(BaseModel):
     task_type: TaskType
 
     # Project info
-    project_key: Optional[str] = Field(None, alias="project.key")
+    project_key: Optional[str] = None
 
     # Basic assignment info
     assignee_count: int = 0

@@ -42,6 +42,79 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
 
+def populate_task_response(task, task_data: TaskResponse) -> TaskResponse:
+    """Populate TaskResponse with data from related entities."""
+    if task.reporter:
+        logger.debug(f"Populating reporter data for task {task.id}")
+        task_data.reporter_name = task.reporter.full_name
+        task_data.reporter_email = task.reporter.email
+
+    if task.project:
+        task_data.project_key = task.project.key
+        task_data.project_name = task.project.name
+
+    # Populate assignees
+    task_data.assignees = []
+    for assignee in task.assignees:
+        assignee_data = populate_assignee_response(assignee)
+        task_data.assignees.append(assignee_data)
+
+    return task_data
+
+
+def populate_assignee_response(assignee) -> TaskAssigneeResponse:
+    """Populate TaskAssigneeResponse with data from related entities."""
+    assignee_data = TaskAssigneeResponse.model_validate(assignee)
+
+    if assignee.user:
+        assignee_data.user_name = assignee.user.full_name
+        assignee_data.user_email = assignee.user.email
+        assignee_data.user_username = assignee.user.username
+        assignee_data.user_avatar_url = assignee.user.avatar_url
+
+    if assignee.assigner:
+        assignee_data.assigner_name = assignee.assigner.full_name
+
+    return assignee_data
+
+
+def populate_task_list_item(task) -> TaskListItem:
+    """Populate TaskListItem with data from related entities."""
+    task_item = TaskListItem.model_validate(task)
+    if task.project:
+        task_item.project_key = task.project.key
+    return task_item
+
+
+def populate_comment_response(comment) -> TaskCommentResponse:
+    """Populate TaskCommentResponse with data from related entities."""
+    comment_data = TaskCommentResponse.model_validate(comment)
+    if comment.author:
+        comment_data.author_name = comment.author.full_name
+        comment_data.author_email = comment.author.email
+        comment_data.author_avatar_url = comment.author.avatar_url
+    return comment_data
+
+
+def populate_time_log_response(log) -> TaskTimeLogResponse:
+    """Populate TaskTimeLogResponse with data from related entities."""
+    log_data = TaskTimeLogResponse.model_validate(log)
+    if log.user:
+        log_data.user_name = log.user.full_name
+        log_data.user_email = log.user.email
+    return log_data
+
+
+def populate_dependency_response(dep) -> TaskDependencyResponse:
+    """Populate TaskDependencyResponse with data from related entities."""
+    dep_data = TaskDependencyResponse.model_validate(dep)
+    if dep.blocking_task:
+        dep_data.blocking_task_title = dep.blocking_task.title
+    if dep.blocked_task:
+        dep_data.blocked_task_title = dep.blocked_task.title
+    return dep_data
+
+
 @router.post(
     "/",
     response_model=DataResponse[TaskResponse],
@@ -60,9 +133,12 @@ async def create_task(
     task_service = TaskService(db)
     task = await task_service.create_task(task_data, UUID(current_user.id))
 
+    task_response = TaskResponse.model_validate(task)
+    task_response = populate_task_response(task, task_response)
+
     return DataResponse(
         message="Task created successfully",
-        data=TaskResponse.model_validate(task),
+        data=task_response,
     )
 
 
@@ -84,9 +160,12 @@ async def get_task(
     if not await task_service.can_user_view_task(UUID(current_user.id), task):
         raise ForbiddenException("Insufficient permissions to view this task")
 
+    task_response = TaskResponse.model_validate(task)
+    task_response = populate_task_response(task, task_response)
+
     return DataResponse(
         message="Task retrieved successfully",
-        data=TaskResponse.model_validate(task),
+        data=task_response,
     )
 
 
@@ -114,9 +193,12 @@ async def get_task_by_number(
     if not await task_service.can_user_view_task(UUID(current_user.id), task):
         raise ForbiddenException("Insufficient permissions to view this task")
 
+    task_response = TaskResponse.model_validate(task)
+    task_response = populate_task_response(task, task_response)
+
     return DataResponse(
         message="Task retrieved successfully",
-        data=TaskResponse.model_validate(task),
+        data=task_response,
     )
 
 
@@ -135,9 +217,12 @@ async def update_task(
     task_service = TaskService(db)
     task = await task_service.update_task(task_id, update_data, UUID(current_user.id))
 
+    task_response = TaskResponse.model_validate(task)
+    task_response = populate_task_response(task, task_response)
+
     return DataResponse(
         message="Task updated successfully",
-        data=TaskResponse.model_validate(task),
+        data=task_response,
     )
 
 
@@ -158,9 +243,12 @@ async def update_task_status(
         task_id, status_data, UUID(current_user.id)
     )
 
+    task_response = TaskResponse.model_validate(task)
+    task_response = populate_task_response(task, task_response)
+
     return DataResponse(
         message="Task status updated successfully",
-        data=TaskResponse.model_validate(task),
+        data=task_response,
     )
 
 
@@ -226,7 +314,7 @@ async def get_project_tasks(
         project_id, UUID(current_user.id), filters, page, size
     )
 
-    task_list = [TaskListItem.model_validate(task) for task in tasks]
+    task_list = [populate_task_list_item(task) for task in tasks]
     pages = (total + size - 1) // size
 
     return ListResponse(
@@ -276,7 +364,7 @@ async def get_my_tasks(
         UUID(current_user.id), filters, page, size
     )
 
-    task_list = [TaskListItem.model_validate(task) for task in tasks]
+    task_list = [populate_task_list_item(task) for task in tasks]
     pages = (total + size - 1) // size
 
     return ListResponse(
@@ -331,8 +419,7 @@ async def get_task_subtasks(
     if not await task_service.can_user_view_task(UUID(current_user.id), task):
         raise ForbiddenException("Insufficient permissions to view this task")
 
-    # Get subtasks
-    subtasks = [TaskListItem.model_validate(subtask) for subtask in task.subtasks]
+    subtasks = [populate_task_list_item(subtask) for subtask in task.subtasks]
 
     return ListResponse(
         success=True,
@@ -368,9 +455,7 @@ async def get_task_assignees(
     if not await task_service.can_user_view_task(UUID(current_user.id), task):
         raise ForbiddenException("Insufficient permissions to view this task")
 
-    assignees = [
-        TaskAssigneeResponse.model_validate(assignee) for assignee in task.assignees
-    ]
+    assignees = [populate_assignee_response(assignee) for assignee in task.assignees]
 
     return DataResponse(
         message="Task assignees retrieved successfully",
@@ -397,9 +482,7 @@ async def assign_users_to_task(
         task_id, assignee_data, UUID(current_user.id)
     )
 
-    assignee_list = [
-        TaskAssigneeResponse.model_validate(assignee) for assignee in assignees
-    ]
+    assignee_list = [populate_assignee_response(assignee) for assignee in assignees]
 
     return DataResponse(
         message="Users assigned to task successfully",
@@ -425,7 +508,7 @@ async def get_task_comments(
         task_id, UUID(current_user.id), page, size
     )
 
-    comment_list = [TaskCommentResponse.model_validate(comment) for comment in comments]
+    comment_list = [populate_comment_response(comment) for comment in comments]
     pages = (total + size - 1) // size
 
     return ListResponse(
@@ -460,9 +543,11 @@ async def create_task_comment(
         task_id, comment_data, UUID(current_user.id)
     )
 
+    comment_response = populate_comment_response(comment)
+
     return DataResponse(
         message="Comment created successfully",
-        data=TaskCommentResponse.model_validate(comment),
+        data=comment_response,
     )
 
 
@@ -483,9 +568,11 @@ async def log_time_to_task(
         task_id, time_log_data, UUID(current_user.id)
     )
 
+    time_log_response = populate_time_log_response(time_log)
+
     return DataResponse(
         message="Time logged successfully",
-        data=TaskTimeLogResponse.model_validate(time_log),
+        data=time_log_response,
     )
 
 
@@ -506,7 +593,7 @@ async def get_task_time_logs(
     if not await task_service.can_user_view_task(UUID(current_user.id), task):
         raise ForbiddenException("Insufficient permissions to view this task")
 
-    time_logs = [TaskTimeLogResponse.model_validate(log) for log in task.time_logs]
+    time_logs = [populate_time_log_response(log) for log in task.time_logs]
 
     return ListResponse(
         success=True,
@@ -539,9 +626,11 @@ async def create_task_dependency(
         UUID(current_user.id),
     )
 
+    dependency_response = populate_dependency_response(dependency)
+
     return DataResponse(
         message="Task dependency created successfully",
-        data=TaskDependencyResponse.model_validate(dependency),
+        data=dependency_response,
     )
 
 
@@ -565,12 +654,8 @@ async def get_task_dependencies(
     if not await task_service.can_user_view_task(UUID(current_user.id), task):
         raise ForbiddenException("Insufficient permissions to view this task")
 
-    blocking = [
-        TaskDependencyResponse.model_validate(dep) for dep in task.blocking_tasks
-    ]
-    blocked_by = [
-        TaskDependencyResponse.model_validate(dep) for dep in task.blocked_by_tasks
-    ]
+    blocking = [populate_dependency_response(dep) for dep in task.blocking_tasks]
+    blocked_by = [populate_dependency_response(dep) for dep in task.blocked_by_tasks]
 
     return DataResponse(
         message="Task dependencies retrieved successfully",
@@ -594,6 +679,13 @@ async def bulk_update_tasks(
     """
     task_service = TaskService(db)
     results = await task_service.bulk_update_tasks(bulk_data, UUID(current_user.id))
+
+    updated_tasks = []
+    for task in results.get("updated_tasks", []):
+        task_item = populate_task_list_item(task)
+        updated_tasks.append(task_item)
+
+    results["updated_tasks"] = updated_tasks
 
     return DataResponse(
         message=f"Bulk update completed: {results['success_count']} success, {results['error_count']} errors",
