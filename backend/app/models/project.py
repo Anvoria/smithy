@@ -184,7 +184,12 @@ class Project(Base):
     # Relationships
     organization = relationship("Organization", back_populates="projects")
     lead = relationship("User", foreign_keys=[lead_id])
-    tasks = relationship("Task", back_populates="project", cascade="all, delete-orphan")
+    tasks = relationship(
+        "Task",
+        back_populates="project",
+        cascade="all, delete-orphan",
+        order_by="Task.task_number",
+    )
     members = relationship(
         "ProjectMember", back_populates="project", cascade="all, delete-orphan"
     )
