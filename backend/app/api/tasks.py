@@ -12,6 +12,7 @@ from app.schemas.responses import (
     ListResponse,
     PaginationMeta,
 )
+from app.core.exceptions import NotFoundException, ForbiddenException
 from app.schemas.task import (
     TaskCreate,
     TaskUpdate,
@@ -81,8 +82,6 @@ async def get_task(
 
     # Check permissions
     if not await task_service.can_user_view_task(UUID(current_user.id), task):
-        from app.core.exceptions import ForbiddenException
-
         raise ForbiddenException("Insufficient permissions to view this task")
 
     return DataResponse(
@@ -110,13 +109,9 @@ async def get_task_by_number(
     task = await task_service.get_task_by_project_and_number(project_id, task_number)
 
     if not task:
-        from app.core.exceptions import NotFoundException
-
         raise NotFoundException("Task", f"{project_id}-{task_number}")
 
     if not await task_service.can_user_view_task(UUID(current_user.id), task):
-        from app.core.exceptions import ForbiddenException
-
         raise ForbiddenException("Insufficient permissions to view this task")
 
     return DataResponse(
@@ -334,8 +329,6 @@ async def get_task_subtasks(
     task = await task_service.get_task_by_id(task_id)
 
     if not await task_service.can_user_view_task(UUID(current_user.id), task):
-        from app.core.exceptions import ForbiddenException
-
         raise ForbiddenException("Insufficient permissions to view this task")
 
     # Get subtasks
@@ -373,8 +366,6 @@ async def get_task_assignees(
     task = await task_service.get_task_by_id(task_id)
 
     if not await task_service.can_user_view_task(UUID(current_user.id), task):
-        from app.core.exceptions import ForbiddenException
-
         raise ForbiddenException("Insufficient permissions to view this task")
 
     assignees = [
@@ -513,8 +504,6 @@ async def get_task_time_logs(
     task = await task_service.get_task_by_id(task_id)
 
     if not await task_service.can_user_view_task(UUID(current_user.id), task):
-        from app.core.exceptions import ForbiddenException
-
         raise ForbiddenException("Insufficient permissions to view this task")
 
     time_logs = [TaskTimeLogResponse.model_validate(log) for log in task.time_logs]
@@ -574,8 +563,6 @@ async def get_task_dependencies(
     task = await task_service.get_task_by_id(task_id)
 
     if not await task_service.can_user_view_task(UUID(current_user.id), task):
-        from app.core.exceptions import ForbiddenException
-
         raise ForbiddenException("Insufficient permissions to view this task")
 
     blocking = [
