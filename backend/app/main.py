@@ -90,6 +90,7 @@ def create_app() -> FastAPI:
     Create and configure FastAPI application.
     :return: FastAPI application
     """
+    logging.getLogger("watchfiles.main").setLevel(logging.CRITICAL)
 
     app = FastAPI(
         title="Smithy API",
