@@ -179,7 +179,7 @@ class Task(Base):
     )
 
     # Hierarchical relationships
-    parent_task = relationship("Task", remote_side=[id], back_populates="subtasks")
+    parent_task = relationship("Task", remote_side="Task.id", back_populates="subtasks")
     subtasks = relationship(
         "Task", back_populates="parent_task", cascade="all, delete-orphan"
     )
@@ -484,7 +484,7 @@ class TaskComment(Base):
     # Relationships
     task = relationship("Task", back_populates="comments")
     author = relationship("User")
-    parent_comment = relationship("TaskComment", remote_side=[id])
+    parent_comment = relationship("TaskComment", remote_side="TaskComment.id")
     replies = relationship("TaskComment", back_populates="parent_comment")
 
     __table_args__ = (
