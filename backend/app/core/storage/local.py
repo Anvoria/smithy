@@ -52,7 +52,7 @@ class LocalStorageProvider(StorageProvider):
 
     async def upload(
         self,
-        file: BinaryIO,
+        file: BinaryIO | bytes,
         filename: str,
         content_type: str,
         folder: str = "",

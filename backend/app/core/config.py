@@ -80,6 +80,24 @@ class Settings(BaseSettings):
         default=0o755,
         description="Directory permissions for local storage",
     )
+    # File upload limits
+    MAX_FILE_SIZE_MB: int = Field(
+        default=10, description="Maximum file size for uploads in MB"
+    )
+    MAX_LOGO_SIZE_MB: int = Field(default=5, description="Maximum logo size in MB")
+    # Allowed file types
+    ALLOWED_FILE_TYPES: str = Field(
+        default="image/jpeg,image/png,image/gif,application/pdf,text/plain",
+        description="Comma-separated list of allowed file MIME types",
+    )
+    ALLOWED_DOCUMENT_TYPES: str = Field(
+        default="application/pdf,text/plain,application/msword",
+        description="Comma-separated list of allowed document MIME types",
+    )
+    ALLOWED_ARCHIVE_TYPES: str = Field(
+        default="application/zip,application/x-rar-compressed",
+        description="Comma-separated list of allowed archive MIME types",
+    )
 
     # Logging
     LOG_LEVEL: str = Field(default="INFO", description="Log level")
