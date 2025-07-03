@@ -13,7 +13,7 @@ class StorageMetadata:
     def __init__(
         self,
         file_path: str,
-        public_url: str,
+        public_url: str | None,
         file_size: int,
         content_type: str,
         original_filename: str,
@@ -38,7 +38,7 @@ class StorageProvider(ABC):
         content_type: str,
         folder: str = "",
         public: bool = True,
-    ):
+    ) -> StorageMetadata:
         """
         Upload a file to the storage provider.
         :param file: File-like object to upload
@@ -74,6 +74,14 @@ class StorageProvider(ABC):
         Check if a file exists in the storage provider.
         :param file_path: Path to the file in the storage provider
         :return: True if the file exists, False otherwise
+        """
+        pass
+
+    @abstractmethod
+    def get_storage_stats(self) -> dict:
+        """
+        Get storage statistics such as total space, used space, etc.
+        :return: Dictionary with storage stats
         """
         pass
 

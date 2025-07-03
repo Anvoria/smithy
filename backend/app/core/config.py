@@ -54,6 +54,33 @@ class Settings(BaseSettings):
         description="CORS origins",
     )
 
+    # Storage settings
+    STORAGE_PROVIDER: str = Field(
+        default="local",
+        description="Storage provider (e.g., local, s3, etc.)",
+    )
+
+    LOCAL_STORAGE_PATH: str = Field(
+        default="uploads",
+        description="Local storage path for file uploads",
+    )
+    LOCAL_STORAGE_URL: str = Field(
+        default=None,
+        description="Base URL for accessing local storage files",
+    )
+    LOCAL_STORAGE_CREATE_DIRS: bool = Field(
+        default=True,
+        description="Create directories for local storage if they don't exist",
+    )
+    LOCAL_STORAGE_FILE_PERMISSIONS: int = Field(
+        default=0o644,
+        description="File permissions for uploaded files in local storage",
+    )
+    LOCAL_STORAGE_DIR_PERMISSIONS: int = Field(
+        default=0o755,
+        description="Directory permissions for local storage",
+    )
+
     # Logging
     LOG_LEVEL: str = Field(default="INFO", description="Log level")
 
@@ -64,6 +91,15 @@ class Settings(BaseSettings):
         allowed_envs = ["development", "staging", "production"]
         if v.lower() not in allowed_envs:
             raise ValueError(f"Environment must be one of: {allowed_envs}")
+        return v.lower()
+
+    @field_validator("STORAGE_PROVIDER")
+    @classmethod
+    def validate_storage_provider(cls, v: str) -> str:
+        """Validate storage provider"""
+        allowed_providers = ["local"]
+        if v.lower() not in allowed_providers:
+            raise ValueError(f"Storage provider must be one of: {allowed_providers}")
         return v.lower()
 
     @field_validator("LOG_LEVEL")
