@@ -335,9 +335,44 @@ class AuthService:
         if login_data.get("attempts") >= 5:
             login_data["is_locked"] = True
 
+            await self._lock_user_account(email=email)
+
         await redis_client.set(
             key=login_key, value=login_data, expire=timedelta(minutes=15)
         )
+
+    async def _lock_user_account(self, email: str) -> None:
+        """
+        Update user's locked field if passed max login attempts.
+        :param email: User email to update.
+        :return: None.
+        """
+        locked_until = datetime.now(UTC) + timedelta(minutes=15)
+
+        stmt = (
+            update(User)
+            .where(User.email == email)
+            .values(is_locked=True, locked_until=locked_until)
+        )
+
+        await self.db.execute(stmt)
+        await self.db.commit()
+
+    async def _unlock_user_account(self, email: str) -> None:
+        """
+        Update user's locked field.
+        :param email: User email to update.
+        :return: None.
+        """
+        stmt = (
+            update(User)
+            .where(User.email == email)
+            .values(is_locked=False, locked_until=Null)
+        )
+
+        await redis_client.delete(key=f"login_attempts:{email}")
+        await self.db.execute(stmt)
+        await self.db.commit()
 
     async def _update_login_info(self, user: User) -> None:
         """
