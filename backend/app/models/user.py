@@ -166,6 +166,18 @@ class User(Base):
         Integer, default=0, nullable=False, comment="Consecutive failed login attempts"
     )
 
+    is_locked: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+        comment="User login is locked."
+    )
+
+    locked_until: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        comment="User login allowed in time."
+    )
+
     # OAuth and external accounts
     oauth_accounts: Mapped[Optional[dict]] = mapped_column(
         JSONB, nullable=True, comment="Connected OAuth accounts data"
