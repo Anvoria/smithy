@@ -332,7 +332,7 @@ class AuthService:
         }
         login_data["attempts"] += 1
 
-        if login_data.get("attempts") >= 5:
+        if login_data.get("attempts", 0) >= 5:
             login_data["is_locked"] = True
 
             await self._lock_user_account(email=email)
