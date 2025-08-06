@@ -1,6 +1,7 @@
 import logging
 from contextlib import asynccontextmanager
-
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 
 from app import __version__
@@ -144,6 +145,19 @@ def create_app() -> FastAPI:
 
     init_routers()
     app.include_router(api_router)
+
+    uploads_path = Path(settings.LOCAL_STORAGE_PATH)
+    if not uploads_path.is_absolute():
+        uploads_path = Path.cwd() / uploads_path
+
+    # Ensure uploads directory exists
+    uploads_path.mkdir(parents=True, exist_ok=True)
+
+    app.mount(
+        f"/{settings.LOCAL_STORAGE_PATH}",
+        StaticFiles(directory=str(uploads_path)),
+        name="uploads",
+    )
 
     return app
 

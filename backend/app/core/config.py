@@ -145,6 +145,18 @@ class Settings(BaseSettings):
             raise ValueError("Port must be between 1 and 65535")
         return v
 
+    @field_validator("LOCAL_STORAGE_FILE_PERMISSIONS", mode="before")
+    @classmethod
+    def parse_file_permissions(cls, v) -> int:
+        """Parse file permissions"""
+        return cls._parse_permissions(v)
+
+    @field_validator("LOCAL_STORAGE_DIR_PERMISSIONS", mode="before")
+    @classmethod
+    def parse_dir_permissions(cls, v) -> int:
+        """Parse directory permissions"""
+        return cls._parse_permissions(v)
+
     @model_validator(mode="after")
     def validate_docs_settings(self) -> "Settings":
         """Validate docs settings based on debug mode"""
@@ -157,6 +169,26 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+
+    @classmethod
+    def _parse_permissions(cls, value) -> int:
+        """
+        Parse permission string to octal integer.
+        Supports formats like '644', '0o644', or '755'.
+        """
+        if isinstance(value, str):
+            if value.isdigit() and len(value) == 3:
+                return int(value, 8)
+            # Handle hex-like "0o755"
+            if value.startswith("0o"):
+                return int(value, 8)
+        elif isinstance(value, int):
+            # If already int, ensure it's reasonable (0-777)
+            if 0 <= value <= 0o777:
+                return value
+
+            # Default fallback
+        return 0o755
 
 
 # Global settings instance
