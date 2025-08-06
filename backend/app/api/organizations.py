@@ -1,8 +1,8 @@
 import logging
-from typing import Annotated
+from typing import Annotated, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, status, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.client import get_db
@@ -22,6 +22,12 @@ from app.schemas.organization import (
 from app.schemas.auth import AuthUser
 from app.services.organization_service import OrganizationService
 from app.core.auth import get_current_user, require_admin
+from app.services.storage_service import StorageService
+from app.core.exceptions import (
+    ValidationException,
+    ForbiddenException,
+    NotFoundException,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -200,6 +206,78 @@ async def update_organization(
         message="Organization updated successfully",
         data=OrganizationResponse.model_validate(organization),
     )
+
+
+@router.post("/{org_id}/media/{logo_type}", response_model=DataResponse[Optional[dict]])
+async def upload_organization_media(
+    org_id: UUID,
+    logo_type: str,
+    file: UploadFile,
+    current_user: Annotated[AuthUser, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> DataResponse[Optional[dict]]:
+    """
+    Upload organization logo, avatar, or banner.
+    """
+    storage_service = StorageService(db)
+
+    try:
+        public_url = await storage_service.upload_organization_logo(
+            organization_id=org_id,
+            file=file,
+            current_user_id=UUID(current_user.id),
+            logo_type=logo_type,
+        )
+
+        return DataResponse(
+            message=f"Organization {logo_type} uploaded successfully",
+            data={"public_url": public_url, "logo_type": logo_type},
+        )
+
+    except ValidationException as e:
+        return DataResponse(
+            message=str(e), data=None, status_code=status.HTTP_400_BAD_REQUEST
+        )
+    except ForbiddenException as e:
+        return DataResponse(
+            message=str(e), data=None, status_code=status.HTTP_403_FORBIDDEN
+        )
+    except NotFoundException as e:
+        return DataResponse(
+            message=str(e), data=None, status_code=status.HTTP_404_NOT_FOUND
+        )
+
+
+@router.delete("/{org_id}/media/{logo_type}")
+async def delete_organization_media(
+    org_id: UUID,
+    logo_type: str,
+    current_user: Annotated[AuthUser, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> MessageResponse:
+    """
+    Delete organization logo, avatar, or banner.
+    """
+    storage_service = StorageService(db)
+
+    try:
+        public_url = await storage_service.delete_organization_logo(
+            organization_id=org_id,
+            current_user_id=UUID(current_user.id),
+            logo_type=logo_type,
+        )
+
+        return MessageResponse(
+            message=f"Organization {logo_type} deleted successfully",
+            data={"public_url": public_url, "logo_type": logo_type},
+        )
+    except Exception as e:
+        logger.error(f"Error deleting organization media: {e}")
+        return MessageResponse(
+            message="Failed to delete organization media",
+            success=False,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
 
 @router.delete("/{org_id}", response_model=MessageResponse)

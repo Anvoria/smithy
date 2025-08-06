@@ -121,6 +121,66 @@ class StorageService:
 
         return metadata.public_url
 
+    async def delete_organization_logo(
+        self,
+        organization_id: UUID,
+        current_user_id: UUID,
+        logo_type: str = "logo",
+    ):
+        """
+        Delete organization logo/avatar/banner.
+
+        :param organization_id: ID of organization
+        :param current_user_id: ID of current user
+        :param logo_type: Type of logo ('logo', 'avatar', 'banner')
+        """
+        try:
+            if logo_type not in ["logo", "avatar", "banner"]:
+                raise ValidationException(
+                    "Invalid logo type. Must be 'logo', 'avatar', or 'banner'"
+                )
+
+            if not await self._can_user_manage_organization(
+                current_user_id, organization_id
+            ):
+                raise ForbiddenException(
+                    "Insufficient permissions to delete organization media"
+                )
+
+            stmt = select(Organization).where(Organization.id == organization_id)
+            org = await self.db.scalar(stmt)
+            if not org:
+                raise NotFoundException("Organization", str(organization_id))
+
+            current_url = getattr(org, f"{logo_type}_url", None)
+            if not current_url:
+                raise NotFoundException(
+                    f"No {logo_type} found for organization {organization_id}"
+                )
+
+            # Extract file path from URL and delete
+            file_path = self._extract_file_path_from_url(current_url)
+            if file_path:
+                deleted = await self.storage_provider.delete(file_path)
+                if not deleted:
+                    logger.warning(f"Failed to delete file from storage: {file_path}")
+            else:
+                logger.warning(f"Could not extract file path from URL: {current_url}")
+
+            update_data = {f"{logo_type}_url": None}
+            stmt = (
+                update(Organization)
+                .where(Organization.id == organization_id)
+                .values(**update_data)
+            )
+            await self.db.execute(stmt)
+            await self.db.commit()
+        except Exception as e:
+            logger.error(f"Error deleting organization {logo_type}: {e}")
+            raise ValidationException(
+                f"Failed to delete organization {logo_type}: {str(e)}"
+            )
+
     async def upload_task_attachment(
         self, task_id: UUID, file: UploadFile, current_user_id: UUID
     ) -> TaskAttachment:
