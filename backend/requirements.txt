@@ -33,6 +33,8 @@ pydantic_core==2.33.2
 pyotp==2.9.0
 python-dotenv==1.1.0
 python-jose==3.5.0
+python-magic==0.4.27
+python-multipart==0.0.20
 qrcode==8.2
 redis==6.2.0
 rsa==4.9.1
