@@ -13,6 +13,10 @@ class ApiClient {
         this.baseURL = baseURL;
     }
 
+    private isAuthEndpoint(url: string): boolean {
+        return this.authEndpoints.some(authEndpoint => url.startsWith(authEndpoint));
+    }
+
     private getAuthToken(): string | null {
         if (typeof window === 'undefined') return null;
         return localStorage.getItem('smithy_access_token');
@@ -90,9 +94,7 @@ class ApiClient {
         const url = `${this.baseURL}/v1${endpoint}`;
         const token = this.getAuthToken();
 
-        const isAuthEndpoint = this.authEndpoints.some((authEndpoint) =>
-            endpoint.startsWith(authEndpoint)
-        );
+        const isAuthEndpoint = this.isAuthEndpoint(url);
 
         // If we're already refreshing, queue this request
         if (this.isRefreshing && !isAuthEndpoint) {
@@ -153,10 +155,7 @@ class ApiClient {
         options: RequestInit,
         token: string | null
     ): Promise<T> {
-        const isAuthEndpoint = this.authEndpoints.some((authEndpoint) =>
-            url.startsWith(authEndpoint)
-        );
-
+        const isAuthEndpoint = this.isAuthEndpoint(url);
         const config: RequestInit = {
             headers: {
                 'Content-Type': 'application/json',
