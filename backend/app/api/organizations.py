@@ -41,7 +41,7 @@ router = APIRouter(prefix="/organizations", tags=["Organizations"])
 )
 async def create_organization(
     org_data: OrganizationCreate,
-    current_user: Annotated[AuthUser, Depends(get_current_user)],
+    current_user: Annotated[AuthUser, Depends(require_admin)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> DataResponse[OrganizationResponse]:
     """
