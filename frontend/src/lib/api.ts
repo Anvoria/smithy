@@ -87,7 +87,7 @@ class ApiClient {
 
     async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
         const url = `${this.baseURL}/v1${endpoint}`;
-        let token = this.getAuthToken();
+        const token = this.getAuthToken();
 
         // If we're already refreshing, queue this request
         if (this.isRefreshing) {
