@@ -118,6 +118,8 @@ class OrganizationService:
             max_members=org_data.max_members,
             max_projects=org_data.max_projects,
             max_storage_gb=org_data.max_storage_gb,
+            require_2fa=org_data.require_2fa,
+            public_projects=org_data.public_projects,
             settings=settings_dict or {},
             features=features_dict or {},
         )

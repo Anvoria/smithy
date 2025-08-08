@@ -50,13 +50,16 @@ async def create_organization(
     The current user will become the owner of the organization.
     """
     org_service = OrganizationService(db)
-    organization = await org_service.create_organization(
+
+    organization, member_count, project_count = await org_service.create_organization(
         org_data, UUID(current_user.id)
     )
 
     return DataResponse(
         message="Organization created successfully",
-        data=OrganizationResponse.model_validate(organization),
+        data=OrganizationResponse.from_organization(
+            organization, current_members=member_count, current_projects=project_count
+        ),
     )
 
 

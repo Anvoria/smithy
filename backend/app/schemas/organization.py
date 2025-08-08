@@ -90,6 +90,10 @@ class OrganizationCreate(OrganizationBase):
     max_projects: int = Field(3, ge=1, le=100, description="Maximum number of projects")
     max_storage_gb: int = Field(1, ge=1, le=100, description="Maximum storage in GB")
 
+    # Security settings
+    require_2fa: bool = Field(False, description="Require 2FA for all members")
+    public_projects: bool = Field(False, description="Allow public project visibility")
+
     # Configuration
     settings: Optional[OrganizationSettings] = Field(
         None, description="Organization settings"
