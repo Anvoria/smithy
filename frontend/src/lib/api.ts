@@ -2,6 +2,7 @@ import { GenericApiError, GenericApiErrorData } from '@/types/auth';
 
 class ApiClient {
     private readonly baseURL: string;
+    private readonly authEndpoints = ['/auth/login', '/auth/register'];
     private isRefreshing = false;
     private failedQueue: Array<{
         resolve: (value: string) => void;
@@ -89,8 +90,12 @@ class ApiClient {
         const url = `${this.baseURL}/v1${endpoint}`;
         const token = this.getAuthToken();
 
+        const isAuthEndpoint = this.authEndpoints.some((authEndpoint) =>
+            endpoint.startsWith(authEndpoint)
+        );
+
         // If we're already refreshing, queue this request
-        if (this.isRefreshing) {
+        if (this.isRefreshing && !isAuthEndpoint) {
             return new Promise((resolve, reject) => {
                 this.failedQueue.push({
                     resolve: (newToken: string) => {
@@ -106,12 +111,11 @@ class ApiClient {
         try {
             return await this.executeRequest<T>(url, options, token);
         } catch (error) {
-            if (error instanceof GenericApiError && this.isUnauthorizedError(error)) {
-                if (endpoint === '/auth/refresh') {
-                    this.clearTokens();
-                    throw error;
-                }
-
+            if (
+                error instanceof GenericApiError &&
+                this.isUnauthorizedError(error) &&
+                !isAuthEndpoint
+            ) {
                 if (this.isRefreshing) {
                     // If already refreshing, queue this request
                     return new Promise((resolve, reject) => {
@@ -149,10 +153,14 @@ class ApiClient {
         options: RequestInit,
         token: string | null
     ): Promise<T> {
+        const isAuthEndpoint = this.authEndpoints.some((authEndpoint) =>
+            url.startsWith(authEndpoint)
+        );
+
         const config: RequestInit = {
             headers: {
                 'Content-Type': 'application/json',
-                ...(token && { Authorization: `Bearer ${token}` }),
+                ...(token && !isAuthEndpoint && { Authorization: `Bearer ${token}` }),
                 ...options.headers,
             },
             ...options,
