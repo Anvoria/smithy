@@ -74,7 +74,8 @@ export default function LoginForm() {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleInitialLogin = async () => {
+    const handleInitialLogin = async (e?: React.FormEvent) => {
+        e?.preventDefault();
         if (!validateForm()) return;
 
         setIsLoading(true);
@@ -111,7 +112,8 @@ export default function LoginForm() {
         }
     };
 
-    const handleMFALogin = async () => {
+    const handleMFALogin = async (e?: React.FormEvent) => {
+        e?.preventDefault();
         if (!validateForm(true) || !partialAuthToken) return;
 
         setIsLoading(true);
