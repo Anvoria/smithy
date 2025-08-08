@@ -838,4 +838,19 @@ def downgrade() -> None:
     op.drop_index("idx_org_type_size", table_name="organizations")
     op.drop_index("idx_org_slug_active", table_name="organizations")
     op.drop_table("organizations")
+
+    op.execute("""
+       DO $$
+       DECLARE
+           r RECORD;
+       BEGIN
+           FOR r IN
+               SELECT typname
+               FROM pg_type
+               WHERE typtype = 'e' AND typnamespace = 'public'::regnamespace
+           LOOP
+               EXECUTE format('DROP TYPE IF EXISTS %I CASCADE;', r.typname);
+           END LOOP;
+       END$$;
+       """)
     # ### end Alembic commands ###
