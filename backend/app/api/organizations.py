@@ -21,7 +21,7 @@ from app.schemas.organization import (
 )
 from app.schemas.auth import AuthUser
 from app.services.organization_service import OrganizationService
-from app.core.auth import get_current_user, require_admin
+from app.core.auth import get_current_user, require_admin, require_superuser
 from app.services.storage_service import StorageService
 from app.core.exceptions import (
     ValidationException,
@@ -41,7 +41,7 @@ router = APIRouter(prefix="/organizations", tags=["Organizations"])
 )
 async def create_organization(
     org_data: OrganizationCreate,
-    current_user: Annotated[AuthUser, Depends(require_admin)],
+    current_user: Annotated[AuthUser, Depends(require_superuser)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> DataResponse[OrganizationResponse]:
     """
