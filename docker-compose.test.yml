@@ -1,0 +1,11 @@
+version: '3.9'
+
+services:
+  test-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: test_smithy
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+    ports:
+      - "5432:5432"
