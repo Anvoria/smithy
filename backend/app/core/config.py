@@ -1,6 +1,6 @@
 from typing import List
 from pydantic import Field, field_validator, model_validator
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from time import time
 
 
@@ -166,9 +166,11 @@ class Settings(BaseSettings):
         # In production, docs can be explicitly disabled
         return self
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     @classmethod
     def _parse_permissions(cls, value) -> int:
