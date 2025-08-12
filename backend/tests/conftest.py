@@ -9,8 +9,7 @@ from app.main import app
 from app.db.client import get_db
 from app.db.base import Base
 
-# Test database URL
-TEST_DATABASE_URL = "postgresql+asyncpg://test:test@localhost:5432/test_smithy"
+TEST_DATABASE_URL = "postgresql+asyncpg://test:test@localhost:5433/test_smithy"
 
 
 @pytest.fixture(scope="session")
@@ -34,9 +33,15 @@ async def test_db() -> AsyncGenerator[AsyncSession, None]:
     )
 
     async with async_session() as session:
-        yield session
+        try:
+            yield session
+        finally:
+            await session.rollback()
+            await session.close()
 
-    # Cleanup after test
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+
     await engine.dispose()
 
 
