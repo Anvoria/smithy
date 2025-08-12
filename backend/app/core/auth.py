@@ -69,6 +69,7 @@ async def get_current_user(
             email=user.email,
             username=user.username,
             role=user.role.value,
+            is_superuser=user.is_superuser,
             is_verified=user.is_verified,
             is_active=user.is_active,
             full_name=user.full_name,
@@ -134,6 +135,19 @@ async def require_role(
         return current_user
 
     return role_checker
+
+
+async def require_superuser(
+    current_user: AuthUser = Depends(get_current_active_user),
+) -> AuthUser:
+    """
+    Dependency to check if the current user is a superuser.
+    :param current_user: Authenticated user from get_current_active_user dependency.
+    :return: AuthUser object if the user is a superuser.
+    """
+    if not current_user.is_superuser:
+        raise ForbiddenException("Access denied for non-superusers")
+    return current_user
 
 
 async def require_admin(

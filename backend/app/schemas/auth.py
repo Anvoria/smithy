@@ -77,6 +77,7 @@ class AuthUser(BaseModel):
     email: str
     username: Optional[str]
     role: UserRole
+    is_superuser: bool
     is_verified: bool
     is_active: bool
     full_name: Optional[str]
