@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { RegisterRequest } from '@/types/auth';
 import { AuthLayout } from '@/components/layout/AuthLayout';
-import { FormField } from '@/components/forms/FormField';
-import { Button } from '@/components/forms/Button';
+import { FormField } from '@/components/ui/forms/FormField';
+import { Button } from '@/components/ui/forms/Button';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 
 interface RegisterFormState {

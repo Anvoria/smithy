@@ -1,5 +1,5 @@
-import { FormField } from '@/components/forms/FormField';
-import { Button } from '@/components/forms/Button';
+import { FormField } from '@/components/ui/forms/FormField';
+import { Button } from '@/components/ui/forms/Button';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 
 interface MFAStepProps {

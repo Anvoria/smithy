@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import { FormField } from '@/components/forms/FormField';
-import { Checkbox } from '@/components/forms/Checkbox';
-import { Button } from '@/components/forms/Button';
+import { FormField } from '@/components/ui/forms/FormField';
+import { Checkbox } from '@/components/ui/forms/Checkbox';
+import { Button } from '@/components/ui/forms/Button';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 
 interface EmailPasswordStepProps {
