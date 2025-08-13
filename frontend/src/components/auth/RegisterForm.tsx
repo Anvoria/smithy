@@ -42,7 +42,6 @@ export default function RegisterForm() {
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState<RegisterErrors>({});
 
-    // Password strength validation
     const validatePasswordStrength = (password: string) => {
         return {
             length: password.length >= 8,
@@ -107,7 +106,6 @@ export default function RegisterForm() {
             [field]: value,
         }));
 
-        // Clear field-specific errors
         if (errors[field as keyof RegisterErrors]) {
             setErrors((prev) => {
                 const newErrors = { ...prev };
@@ -116,7 +114,6 @@ export default function RegisterForm() {
             });
         }
 
-        // Clear confirm password error if passwords now match
         if (
             field === 'password' &&
             formData.confirmPassword &&
@@ -175,21 +172,22 @@ export default function RegisterForm() {
 
     return (
         <AuthLayout>
-            <div>
-                <div className="mb-8">
-                    <h2 className="font-machina text-3xl font-medium text-white mb-2">
-                        Create Account
+            <div className="w-full max-w-sm mx-auto">
+                <div className="text-center mb-6">
+                    <h2 className="font-machina text-2xl font-medium text-white mb-1">
+                        Create account
                     </h2>
                     <p className="text-[var(--ash-gray)] text-sm">Set up your workspace</p>
                 </div>
 
-                {/* General Error */}
-                {errors.general && <ErrorMessage message={errors.general} className="mb-6" />}
+                {errors.general && (
+                    <div className="mb-4">
+                        <ErrorMessage message={errors.general} />
+                    </div>
+                )}
 
-                {/* Form */}
-                <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="space-y-5">
-                    {/* Name Fields */}
-                    <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4" onKeyDown={handleKeyDown}>
+                    <div className="grid grid-cols-2 gap-3">
                         <FormField
                             label="First Name"
                             type="text"
@@ -213,7 +211,6 @@ export default function RegisterForm() {
                         />
                     </div>
 
-                    {/* Email */}
                     <FormField
                         label="Email"
                         type="email"
@@ -226,13 +223,12 @@ export default function RegisterForm() {
                         autoComplete="email"
                     />
 
-                    {/* Password */}
                     <FormField
                         label="Password"
                         type="password"
                         value={formData.password}
                         onChange={(value: string) => handleFieldChange('password', value)}
-                        placeholder="Create a strong password"
+                        placeholder="Create password"
                         error={errors.password}
                         disabled={isLoading}
                         autoComplete="new-password"
@@ -241,7 +237,6 @@ export default function RegisterForm() {
                         onPasswordToggle={() => setShowPassword(!showPassword)}
                     />
 
-                    {/* Password Strength Indicator */}
                     {formData.password && passwordStrength && (
                         <div className="space-y-2">
                             <div className="flex items-center justify-between text-xs">
@@ -258,50 +253,48 @@ export default function RegisterForm() {
                                     {passwordStrength.text}
                                 </span>
                             </div>
-                            <div className="w-full bg-[var(--charcoal)] rounded-full h-2">
+                            <div className="w-full bg-gray-700/30 rounded-full h-1.5">
                                 <div
-                                    className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
+                                    className={`h-1.5 rounded-full transition-all duration-300 ${passwordStrength.color}`}
                                     style={{
                                         width: `${(Object.values(validatePasswordStrength(formData.password)).filter(Boolean).length / 5) * 100}%`,
                                     }}
                                 />
                             </div>
-                            <div className="text-xs text-[var(--ash-gray)]">
-                                <p>Password requirements:</p>
-                                <div className="grid grid-cols-2 gap-1 mt-1">
-                                    {Object.entries(
-                                        validatePasswordStrength(formData.password)
-                                    ).map(([key, valid]) => (
+                            <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+                                {Object.entries(validatePasswordStrength(formData.password)).map(
+                                    ([key, valid]) => (
                                         <div
                                             key={key}
-                                            className={`flex items-center ${valid ? 'text-green-400' : 'text-red-400'}`}
+                                            className={`flex items-center ${valid ? 'text-green-400' : 'text-gray-500'}`}
                                         >
-                                            <span className="mr-1">{valid ? '✓' : '✗'}</span>
-                                            <span className="text-xs">
+                                            <span className="mr-1.5 text-xs">
+                                                {valid ? '✓' : '·'}
+                                            </span>
+                                            <span>
                                                 {key === 'length'
-                                                    ? '8+ characters'
+                                                    ? '8+ chars'
                                                     : key === 'uppercase'
                                                       ? 'Uppercase'
                                                       : key === 'lowercase'
                                                         ? 'Lowercase'
                                                         : key === 'digit'
                                                           ? 'Number'
-                                                          : 'Special char'}
+                                                          : 'Special'}
                                             </span>
                                         </div>
-                                    ))}
-                                </div>
+                                    )
+                                )}
                             </div>
                         </div>
                     )}
 
-                    {/* Confirm Password */}
                     <FormField
                         label="Confirm Password"
                         type="password"
                         value={formData.confirmPassword}
                         onChange={(value: string) => handleFieldChange('confirmPassword', value)}
-                        placeholder="Confirm your password"
+                        placeholder="Confirm password"
                         error={errors.confirmPassword}
                         disabled={isLoading}
                         autoComplete="new-password"
@@ -310,8 +303,7 @@ export default function RegisterForm() {
                         onPasswordToggle={() => setShowConfirmPassword(!showConfirmPassword)}
                     />
 
-                    {/* Terms and Privacy */}
-                    <div className="text-xs text-[var(--ash-gray)] leading-relaxed">
+                    <div className="text-xs text-[var(--ash-gray)] leading-relaxed pt-2">
                         By creating an account, you agree to our{' '}
                         <Link
                             href="/terms"
@@ -328,30 +320,29 @@ export default function RegisterForm() {
                         </Link>
                     </div>
 
-                    {/* Submit Button */}
                     <Button
                         type="submit"
                         variant="primary"
                         disabled={isLoading}
                         loading={isLoading}
                         fullWidth
-                        className="mt-6"
+                        className="mt-5"
+                        onClick={handleSubmit}
                     >
-                        {isLoading ? 'Creating Account...' : 'Create Account'}
+                        {isLoading ? 'Creating account...' : 'Create account'}
                     </Button>
-                </form>
+                </div>
 
-                {/* Login Link */}
-                <div className="text-center mt-8">
-                    <div className="text-[var(--ash-gray)] text-sm">
+                <div className="text-center mt-6">
+                    <p className="text-[var(--ash-gray)] text-sm">
                         Already have an account?{' '}
                         <Link
                             href="/login"
-                            className="text-[var(--forge-orange)] hover:text-[var(--spark-yellow)] transition-colors py-2 px-1 cursor-pointer"
+                            className="text-[var(--forge-orange)] hover:text-[var(--spark-yellow)] transition-colors"
                         >
                             Sign in
                         </Link>
-                    </div>
+                    </p>
                 </div>
             </div>
         </AuthLayout>

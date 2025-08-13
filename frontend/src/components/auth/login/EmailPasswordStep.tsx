@@ -38,25 +38,29 @@ export function EmailPasswordStep({
     onKeyDown,
 }: EmailPasswordStepProps) {
     return (
-        <div>
+        <div className="w-full max-w-sm mx-auto">
             {/* Header */}
-            <div className="mb-8">
-                <h2 className="font-machina text-3xl font-medium text-white mb-2">Login</h2>
-                <p className="text-[var(--ash-gray)] text-sm">Enter your credentials</p>
+            <div className="text-center mb-6">
+                <h2 className="font-machina text-2xl font-medium text-white mb-1">Welcome back</h2>
+                <p className="text-[var(--ash-gray)] text-sm">Sign in to continue</p>
             </div>
 
             {/* General Error */}
-            {errors.general && <ErrorMessage message={errors.general} className="mb-6" />}
+            {errors.general && (
+                <div className="mb-4">
+                    <ErrorMessage message={errors.general} />
+                </div>
+            )}
 
             {/* Form */}
-            <form onSubmit={onSubmit} onKeyDown={onKeyDown} className="space-y-5">
+            <div className="space-y-4" onKeyDown={onKeyDown}>
                 {/* Email */}
                 <FormField
                     label="Email"
                     type="email"
                     value={email}
                     onChange={onEmailChange}
-                    placeholder="jacob@smithy.sh"
+                    placeholder="your@email.com"
                     error={errors.email}
                     disabled={isLoading}
                     autoFocus
@@ -69,7 +73,7 @@ export function EmailPasswordStep({
                     type="password"
                     value={password}
                     onChange={onPasswordChange}
-                    placeholder="Enter your password"
+                    placeholder="Enter password"
                     error={errors.password}
                     disabled={isLoading}
                     autoComplete="current-password"
@@ -79,7 +83,7 @@ export function EmailPasswordStep({
                 />
 
                 {/* Remember & Forgot */}
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center justify-between py-1">
                     <Checkbox
                         checked={rememberMe}
                         onChange={onRememberMeChange}
@@ -89,7 +93,9 @@ export function EmailPasswordStep({
 
                     <Link
                         href="/forgot"
-                        className="text-[var(--forge-orange)] hover:text-[var(--spark-yellow)] transition-colors py-2 px-1 cursor-pointer"
+                        className="text-[var(--forge-orange)] hover:text-[var(--spark-yellow)]
+                                 text-sm transition-colors
+                                 focus:outline-none focus:underline"
                     >
                         Forgot password?
                     </Link>
@@ -102,11 +108,12 @@ export function EmailPasswordStep({
                     disabled={isLoading}
                     loading={isLoading}
                     fullWidth
-                    className="mt-6"
+                    className="mt-5"
+                    onClick={() => onSubmit({} as React.FormEvent)}
                 >
-                    {isLoading ? 'Logging in...' : 'Login'}
+                    {isLoading ? 'Signing in...' : 'Sign in'}
                 </Button>
-            </form>
+            </div>
         </div>
     );
 }

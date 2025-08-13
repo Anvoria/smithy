@@ -30,22 +30,24 @@ export function MFAStep({
     };
 
     return (
-        <div>
-            {/* Header */}
-            <div className="mb-8">
-                <h2 className="font-machina text-3xl font-medium text-white mb-2">
-                    Enter MFA Code
-                </h2>
+        <div className="w-full max-w-sm mx-auto">
+            {/* Header  */}
+            <div className="text-center mb-6">
+                <h2 className="font-machina text-2xl font-medium text-white mb-1">Verification</h2>
                 <p className="text-[var(--ash-gray)] text-sm">
-                    Enter the 6-digit code from your authenticator app
+                    Enter your 6-digit authentication code
                 </p>
             </div>
 
             {/* General Error */}
-            {generalError && <ErrorMessage message={generalError} className="mb-6" />}
+            {generalError && (
+                <div className="mb-4">
+                    <ErrorMessage message={generalError} />
+                </div>
+            )}
 
             {/* Form */}
-            <form onSubmit={onSubmit} onKeyDown={onKeyDown} className="space-y-5">
+            <div className="space-y-4" onKeyDown={onKeyDown}>
                 {/* MFA Code */}
                 <FormField
                     label="Authentication Code"
@@ -58,17 +60,23 @@ export function MFAStep({
                     autoFocus
                     autoComplete="one-time-code"
                     maxLength={6}
-                    className="text-center font-mono text-lg tracking-widest"
+                    className="text-center font-mono text-lg tracking-[0.3em] font-medium"
                 />
+
+                {/* Helper text */}
+                <p className="text-xs text-[var(--ash-gray)] text-center">
+                    Check your authenticator app for the code
+                </p>
 
                 {/* Submit Button */}
                 <Button
                     type="submit"
                     variant="primary"
-                    disabled={isLoading}
+                    disabled={isLoading || mfaCode.length !== 6}
                     loading={isLoading}
                     fullWidth
-                    className="mt-6"
+                    className="mt-5"
+                    onClick={() => onSubmit({} as React.FormEvent)}
                 >
                     {isLoading ? 'Verifying...' : 'Verify Code'}
                 </Button>
@@ -80,10 +88,25 @@ export function MFAStep({
                     onClick={onBack}
                     disabled={isLoading}
                     fullWidth
+                    className="mt-3"
                 >
                     Back to Login
                 </Button>
-            </form>
+            </div>
+
+            {/* Backup codes hint */}
+            <div className="mt-6 text-center">
+                <p className="text-xs text-[var(--ash-gray)]">
+                    Lost your device?{' '}
+                    <button
+                        type="button"
+                        className="text-[var(--forge-orange)] hover:text-[var(--spark-yellow)] transition-colors focus:outline-none focus:underline"
+                        disabled={isLoading}
+                    >
+                        Use backup code
+                    </button>
+                </p>
+            </div>
         </div>
     );
 }
