@@ -26,7 +26,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <div
                     className={`
                     fixed lg:static inset-y-0 left-0 z-50
-                    w-64 bg-[#1a1a1a] border-r border-gray-800/50
+                    w-64 bg-[#1a1a1a] border-r border-gray-700/30
                     transform transition-transform duration-300 ease-out
                     ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
                 `}

@@ -49,7 +49,7 @@ export function Sidebar() {
             </nav>
 
             {/* User Section */}
-            <div className="p-3 border-t border-gray-800/30">
+            <div className="p-3 border-t border-gray-700/30">
                 <UserDropdown />
             </div>
         </div>

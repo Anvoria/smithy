@@ -18,7 +18,7 @@ export function Navbar() {
     });
 
     return (
-        <nav className="h-14 bg-[#1a1a1a] border-b border-gray-800/30 flex items-center px-6">
+        <nav className="h-14 bg-[#1a1a1a] border-b border-gray-700/30 flex items-center px-6">
             <div className="flex items-center space-x-2 text-sm">
                 {breadcrumbs.map((crumb, index) => (
                     <div key={crumb.href} className="flex items-center space-x-2">
