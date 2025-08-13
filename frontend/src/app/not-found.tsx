@@ -22,11 +22,9 @@ export default function NotFound() {
                 </div>
 
                 <div className="space-y-4 mb-8">
-                    <h1 className="text-3xl font-machina font-bold text-white">
-                        Page Not Found
-                    </h1>
+                    <h1 className="text-3xl font-machina font-bold text-white">Page Not Found</h1>
                     <p className="text-[var(--ash-gray)] text-lg">
-                        The forge couldn't find what you're looking for.
+                        The forge couldn&#39;t find what you&#39;re looking for.
                     </p>
                     <p className="text-[var(--ash-gray)] text-sm">
                         The page may have been moved, deleted, or you entered the wrong URL.
@@ -46,14 +44,16 @@ export default function NotFound() {
                         <ArrowLeft className="w-4 h-4" />
                         Go Back
                     </button>
-                    
+
                     <Link href="/" className="inline-block">
-                        <button className="px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ease-out
+                        <button
+                            className="px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ease-out
                                          flex items-center justify-center gap-2 focus:outline-none focus:ring-2 
                                          focus:ring-offset-2 focus:ring-offset-transparent active:scale-[0.98]
                                          bg-[var(--coal-shadow)] text-white border border-gray-600/30
                                          hover:bg-[var(--iron-gray)] hover:border-gray-500/40 focus:ring-gray-500/40
-                                         shadow-sm hover:shadow w-full">
+                                         shadow-sm hover:shadow w-full"
+                        >
                             <Home className="w-4 h-4" />
                             Home
                         </button>
