@@ -9,8 +9,13 @@ interface CheckboxProps {
 
 export function Checkbox({ checked, onChange, label, disabled = false }: CheckboxProps) {
     return (
-        <label className="flex items-center cursor-pointer group py-2">
-            <div className="relative">
+        <label
+            className={`
+            flex items-center group cursor-pointer
+            ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+        `}
+        >
+            <div className="relative flex-shrink-0">
                 <input
                     type="checkbox"
                     checked={checked}
@@ -19,18 +24,34 @@ export function Checkbox({ checked, onChange, label, disabled = false }: Checkbo
                     disabled={disabled}
                 />
                 <div
-                    className={`w-4 h-4 rounded transition-colors duration-200 ${
-                        checked
-                            ? 'bg-[var(--forge-orange)]'
-                            : 'bg-[var(--coal-shadow)] group-hover:bg-[var(--iron-gray)]'
-                    }`}
+                    className={`
+                        w-4 h-4 rounded-sm border transition-all duration-200 ease-out
+                        flex items-center justify-center
+                        ${
+                            checked
+                                ? 'bg-[var(--forge-orange)] border-[var(--forge-orange)] scale-100'
+                                : 'bg-transparent border-gray-600/50 group-hover:border-gray-500/70 group-hover:bg-gray-800/30'
+                        }
+                        ${!disabled && 'group-active:scale-95'}
+                        focus-within:ring-2 focus-within:ring-[var(--forge-orange)]/30
+                    `}
                 >
-                    {checked && (
-                        <Check className="w-3 h-3 text-[var(--charcoal-black)] absolute top-0.5 left-0.5" />
-                    )}
+                    <Check
+                        className={`
+                            w-3 h-3 text-[var(--charcoal-black)] 
+                            transition-all duration-150 ease-out
+                            ${checked ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}
+                        `}
+                    />
                 </div>
             </div>
-            <span className="ml-3 text-[var(--ash-gray)] group-hover:text-white transition-colors">
+            <span
+                className={`
+                ml-2.5 text-sm leading-tight
+                transition-colors duration-200
+                ${disabled ? 'text-gray-500' : 'text-[var(--ash-gray)] group-hover:text-gray-300'}
+            `}
+            >
                 {label}
             </span>
         </label>
