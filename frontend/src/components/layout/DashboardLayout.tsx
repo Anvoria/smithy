@@ -36,7 +36,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
                 <div className="flex-1 flex flex-col min-w-0">
                     {/* Navbar */}
-                    <Navbar />
+                    <Navbar onMenuClickAction={() => setSidebarOpen(!sidebarOpen)} />
 
                     <main className="flex-1 overflow-auto">{children}</main>
                 </div>

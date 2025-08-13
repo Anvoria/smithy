@@ -1,9 +1,9 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Menu } from 'lucide-react';
 
-export function Navbar() {
+export function Navbar({ onMenuClickAction }: { onMenuClickAction: () => void }) {
     const pathname = usePathname();
 
     const segments = pathname.split('/').filter(Boolean);
@@ -18,23 +18,34 @@ export function Navbar() {
     });
 
     return (
-        <nav className="h-14 bg-[#1a1a1a] border-b border-gray-700/30 flex items-center px-6">
-            <div className="flex items-center space-x-2 text-sm">
-                {breadcrumbs.map((crumb, index) => (
-                    <div key={crumb.href} className="flex items-center space-x-2">
-                        {index > 0 && <ChevronRight size={14} className="text-gray-500" />}
-                        {crumb.isLast ? (
-                            <span className="text-white font-medium">{crumb.label}</span>
-                        ) : (
-                            <a
-                                href={crumb.href}
-                                className="text-gray-400 hover:text-gray-200 transition-colors"
-                            >
-                                {crumb.label}
-                            </a>
-                        )}
-                    </div>
-                ))}
+        <nav className="h-14 bg-[#1a1a1a] border-b border-gray-700/30 flex items-center px-4 lg:px-6">
+            <div className="flex items-center space-x-4">
+                {/* Mobile Menu Button */}
+                <button
+                    onClick={onMenuClickAction}
+                    className="lg:hidden p-2 hover:bg-gray-800/50 rounded-lg transition-colors"
+                >
+                    <Menu size={18} className="text-gray-300" />
+                </button>
+
+                {/* Breadcrumbs */}
+                <div className="flex items-center space-x-2 text-sm">
+                    {breadcrumbs.map((crumb, index) => (
+                        <div key={crumb.href} className="flex items-center space-x-2">
+                            {index > 0 && <ChevronRight size={14} className="text-gray-500" />}
+                            {crumb.isLast ? (
+                                <span className="text-white font-medium">{crumb.label}</span>
+                            ) : (
+                                <a
+                                    href={crumb.href}
+                                    className="text-gray-400 hover:text-gray-200 transition-colors"
+                                >
+                                    {crumb.label}
+                                </a>
+                            )}
+                        </div>
+                    ))}
+                </div>
             </div>
         </nav>
     );
