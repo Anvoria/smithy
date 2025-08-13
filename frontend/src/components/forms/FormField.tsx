@@ -1,3 +1,5 @@
+import { Eye, EyeOff } from 'lucide-react';
+
 interface FormFieldProps {
     label: string;
     type?: 'text' | 'email' | 'password';
@@ -14,8 +16,6 @@ interface FormFieldProps {
     showPassword?: boolean;
     onPasswordToggle?: () => void;
 }
-
-import { Eye, EyeOff } from 'lucide-react';
 
 export function FormField({
     label,
@@ -36,30 +36,55 @@ export function FormField({
     const inputType = type === 'password' && showPassword ? 'text' : type;
 
     return (
-        <div>
-            <label className="block text-[var(--ash-gray)] text-sm mb-2">{label}</label>
+        <div className="space-y-1.5">
+            <label className="block text-[var(--ash-gray)] text-xs font-medium tracking-wide uppercase">
+                {label}
+            </label>
+
             <div className="relative">
                 <input
                     type={inputType}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    className={`w-full p-3 ${showPasswordToggle ? 'pr-12' : ''} bg-[var(--iron-gray)] text-white border-0 rounded-lg focus:outline-none focus:ring-2 transition-all duration-200 ${
-                        error
-                            ? 'ring-2 ring-[var(--molten-red)]'
-                            : 'focus:ring-[var(--forge-orange)]'
-                    } ${className}`}
+                    className={`
+                        w-full px-3 py-2.5 text-sm
+                        ${showPasswordToggle ? 'pr-10' : ''}
+                        bg-[var(--iron-gray)] text-white 
+                        border border-gray-700/30
+                        rounded-lg
+                        placeholder-gray-500
+                        transition-all duration-200 ease-out
+                        focus:outline-none 
+                        focus:border-[var(--forge-orange)]/60
+                        focus:ring-1 focus:ring-[var(--forge-orange)]/20
+                        focus:bg-[var(--iron-gray)]/80
+                        disabled:opacity-50 disabled:cursor-not-allowed
+                        ${
+                            error
+                                ? 'border-red-500/60 ring-1 ring-red-500/20 focus:border-red-500 focus:ring-red-500/30'
+                                : ''
+                        }
+                        ${className}
+                    `}
                     placeholder={placeholder}
                     autoFocus={autoFocus}
                     autoComplete={autoComplete}
                     disabled={disabled}
                     maxLength={maxLength}
                 />
+
                 {showPasswordToggle && onPasswordToggle && (
                     <button
                         type="button"
                         onClick={onPasswordToggle}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[var(--ash-gray)] hover:text-white transition-colors p-1 cursor-pointer"
+                        className="absolute right-3 top-1/2 -translate-y-1/2
+                                 text-gray-500 hover:text-gray-300
+                                 transition-colors duration-200
+                                 p-0.5 rounded-sm
+                                 focus:outline-none focus:text-[var(--forge-orange)]
+                                 disabled:opacity-50"
                         disabled={disabled}
+                        tabIndex={-1}
                     >
                         {showPassword ? (
                             <EyeOff className="w-4 h-4" />
@@ -69,7 +94,8 @@ export function FormField({
                     </button>
                 )}
             </div>
-            {error && <p className="mt-1 text-[var(--molten-red)] text-xs">{error}</p>}
+
+            {error && <p className="text-red-400 text-xs leading-tight">{error}</p>}
         </div>
     );
 }

@@ -14,7 +14,7 @@ class ApiClient {
     }
 
     private isAuthEndpoint(url: string): boolean {
-        return this.authEndpoints.some(authEndpoint => url.startsWith(authEndpoint));
+        return this.authEndpoints.some((authEndpoint) => url.startsWith(authEndpoint));
     }
 
     private getAuthToken(): string | null {

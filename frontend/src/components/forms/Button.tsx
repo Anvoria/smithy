@@ -21,13 +21,30 @@ export function Button({
     className = '',
     fullWidth = false,
 }: ButtonProps) {
-    const baseClasses =
-        'p-3 font-machina font-medium rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100';
+    const baseClasses = `
+        px-4 py-2.5 text-sm font-medium 
+        rounded-lg 
+        transition-all duration-200 ease-out
+        flex items-center justify-center gap-2
+        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent
+        disabled:opacity-60 disabled:cursor-not-allowed 
+        disabled:transform-none disabled:hover:scale-100
+        active:scale-[0.98]
+    `;
 
     const variantClasses = {
-        primary:
-            'bg-[var(--forge-orange)] text-[var(--charcoal-black)] hover:bg-[var(--spark-yellow)] hover:scale-[1.02]',
-        secondary: 'bg-[var(--coal-shadow)] text-white hover:bg-[var(--iron-gray)]',
+        primary: `
+            bg-[var(--forge-orange)] text-[var(--charcoal-black)] 
+            hover:bg-[var(--spark-yellow)] hover:scale-[1.01]
+            focus:ring-[var(--forge-orange)]/40
+            shadow-sm hover:shadow-md
+        `,
+        secondary: `
+            bg-[var(--coal-shadow)] text-white border border-gray-600/30
+            hover:bg-[var(--iron-gray)] hover:border-gray-500/40
+            focus:ring-gray-500/40
+            shadow-sm hover:shadow
+        `,
     };
 
     const widthClass = fullWidth ? 'w-full' : '';
@@ -37,16 +54,10 @@ export function Button({
             type={type}
             disabled={disabled || loading}
             onClick={onClick}
-            className={`${baseClasses} ${variantClasses[variant]} ${widthClass} ${className}`}
+            className={`${baseClasses} ${variantClasses[variant]} ${widthClass} ${className}`.trim()}
         >
-            {loading ? (
-                <>
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    {children}
-                </>
-            ) : (
-                children
-            )}
+            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+            <span className={loading ? 'opacity-75' : ''}>{children}</span>
         </button>
     );
 }
