@@ -48,9 +48,9 @@ async def login(
     login_data: LoginRequest, db: Annotated[AsyncSession, Depends(get_db)]
 ) -> Union[TokenResponse, MFARequiredResponse]:
     """
-     Authenticate user and create session.
+    Authenticate user and create session.
 
-     Returns access and refresh tokens on successful authentication.
+    Returns access and refresh tokens on successful authentication.
     If MFA is enabled and no MFA code is provided, returns MFARequiredResponse
     """
     auth_service = AuthService(db)

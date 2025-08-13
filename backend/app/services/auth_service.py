@@ -275,6 +275,7 @@ class AuthService:
         session_data = {
             "user_id": str(user.id),
             "email": user.email,
+            "is_superuser": user.is_superuser,
             "role": user.role.value,
             "login_at": datetime.now(UTC).isoformat(),
             "remember_me": remember_me,
@@ -294,6 +295,7 @@ class AuthService:
             id=str(user.id),
             email=user.email,
             username=user.username,
+            is_superuser=user.is_superuser,
             role=user.role.value,
             is_verified=user.is_verified,
             is_active=user.is_active,
