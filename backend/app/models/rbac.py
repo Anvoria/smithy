@@ -331,3 +331,142 @@ class UserRole(Base):
 
     def __repr__(self) -> str:
         return f"<UserRole(user_id={self.user_id}, role_id={self.role_id}, resource={self.resource_type}:{self.resource_id})>"
+
+
+# Helper function for seeding default permissions and roles
+def get_default_permissions() -> list[dict]:
+    """Default permissions to seed in the database"""
+    return [
+        # System permissions
+        {
+            "name": "system.admin",
+            "resource_type": "system",
+            "action": "manage",
+            "description": "Full system administration access",
+            "is_system": True,
+        },
+        # Organization permissions
+        {
+            "name": "organization.create",
+            "resource_type": "organization",
+            "action": "create",
+            "description": "Create new organizations",
+        },
+        {
+            "name": "organization.read",
+            "resource_type": "organization",
+            "action": "read",
+            "description": "View organization details",
+        },
+        {
+            "name": "organization.update",
+            "resource_type": "organization",
+            "action": "update",
+            "description": "Update organization settings",
+        },
+        {
+            "name": "organization.delete",
+            "resource_type": "organization",
+            "action": "delete",
+            "description": "Delete organization",
+        },
+        {
+            "name": "organization.manage",
+            "resource_type": "organization",
+            "action": "manage",
+            "description": "Full organization management including settings and billing",
+        },
+        {
+            "name": "organization.invite",
+            "resource_type": "organization",
+            "action": "invite",
+            "description": "Invite users to organization",
+        },
+        # Project permissions
+        {
+            "name": "project.create",
+            "resource_type": "project",
+            "action": "create",
+            "description": "Create new projects",
+        },
+        {
+            "name": "project.read",
+            "resource_type": "project",
+            "action": "read",
+            "description": "View project details",
+        },
+        {
+            "name": "project.update",
+            "resource_type": "project",
+            "action": "update",
+            "description": "Update project settings",
+        },
+        {
+            "name": "project.delete",
+            "resource_type": "project",
+            "action": "delete",
+            "description": "Delete project",
+        },
+        {
+            "name": "project.manage",
+            "resource_type": "project",
+            "action": "manage",
+            "description": "Full project management including members and settings",
+        },
+        {
+            "name": "project.invite",
+            "resource_type": "project",
+            "action": "invite",
+            "description": "Invite users to project",
+        },
+        # Task permissions
+        {
+            "name": "task.create",
+            "resource_type": "task",
+            "action": "create",
+            "description": "Create new tasks",
+        },
+        {
+            "name": "task.read",
+            "resource_type": "task",
+            "action": "read",
+            "description": "View task details",
+        },
+        {
+            "name": "task.update",
+            "resource_type": "task",
+            "action": "update",
+            "description": "Update task details",
+        },
+        {
+            "name": "task.delete",
+            "resource_type": "task",
+            "action": "delete",
+            "description": "Delete tasks",
+        },
+        {
+            "name": "task.assign",
+            "resource_type": "task",
+            "action": "assign",
+            "description": "Assign tasks to users",
+        },
+        # User permissions
+        {
+            "name": "user.read",
+            "resource_type": "user",
+            "action": "read",
+            "description": "View user profiles",
+        },
+        {
+            "name": "user.update",
+            "resource_type": "user",
+            "action": "update",
+            "description": "Update user profiles",
+        },
+        {
+            "name": "user.manage",
+            "resource_type": "user",
+            "action": "manage",
+            "description": "Full user management including roles",
+        },
+    ]
