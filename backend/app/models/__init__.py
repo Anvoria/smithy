@@ -4,9 +4,7 @@ Models package for the application.
 
 from .user import User
 from .organization import Organization
-from .organization_member import OrganizationMember
 from .project import Project
-from .project_member import ProjectMember
 from .mfa_backup_code import MFABackupCode
 from .task import (
     Task,
@@ -17,12 +15,20 @@ from .task import (
     TaskTimeLog,
 )
 
+from .rbac import (
+    Permission,
+    Role,
+    RolePermission,
+    UserRole,
+    ResourceType,
+    ActionType,
+    RoleScope,
+)
+
 __all__ = [
     "User",
     "Organization",
-    "OrganizationMember",
     "Project",
-    "ProjectMember",
     "MFABackupCode",
     "Task",
     "TaskAssignee",
@@ -30,4 +36,11 @@ __all__ = [
     "TaskDependency",
     "TaskComment",
     "TaskTimeLog",
+    "Permission",
+    "Role",
+    "RolePermission",
+    "UserRole",
+    "ResourceType",
+    "ActionType",
+    "RoleScope",
 ]

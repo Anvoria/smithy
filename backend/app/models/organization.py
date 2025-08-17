@@ -8,7 +8,6 @@ from sqlalchemy import (
     DateTime,
     Text,
     Integer,
-    JSON,
     Index,
     CheckConstraint,
     UniqueConstraint,
@@ -16,7 +15,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
-from app.models.organization_member import MemberStatus
 
 
 class OrganizationType(str, Enum):
@@ -31,23 +29,14 @@ class OrganizationType(str, Enum):
     PERSONAL = "personal"
 
 
-class OrganizationStatus(str, Enum):
-    """Organization status"""
-
-    ACTIVE = "active"
-    SUSPENDED = "suspended"
-    EXPIRED = "expired"
-    ARCHIVED = "archived"
-
-
 class OrganizationSize(str, Enum):
     """Organization size categories"""
 
-    SMALL = "1-10"
-    MEDIUM = "11-50"
-    LARGE = "51-200"
-    ENTERPRISE = "201+"
-    SOLO = "solo"  # For freelancers or solo entrepreneurs
+    SOLO = "solo"  # 1 person
+    SMALL = "small"  # 2-10 people
+    MEDIUM = "medium"  # 11-50 people
+    LARGE = "large"  # 51-200 people
+    ENTERPRISE = "enterprise"  # 200+ people
 
 
 class Organization(Base):
@@ -119,51 +108,52 @@ class Organization(Base):
     )
 
     company_size: Mapped[OrganizationSize] = mapped_column(
-        default=OrganizationSize.SOLO,
+        default=OrganizationSize.SMALL,
         nullable=False,
         index=True,
-        comment="Size of the organization",
+        comment="Size category of organization",
+    )
+
+    # Settings & Features
+    public_projects: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+        comment="Allow public projects visible to non-members",
+    )
+
+    require_email_verification: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        nullable=False,
+        comment="Require email verification for new members",
+    )
+
+    allow_guest_access: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+        comment="Allow temporary guest access to projects",
     )
 
     # Limits & Quotas
     max_members: Mapped[int] = mapped_column(
-        Integer, default=5, nullable=False, comment="Maximum number of members allowed"
+        Integer, default=10, nullable=False, comment="Maximum number of members"
     )
 
     max_projects: Mapped[int] = mapped_column(
-        Integer, default=3, nullable=False, comment="Maximum number of projects allowed"
+        Integer, default=5, nullable=False, comment="Maximum number of projects"
     )
 
     max_storage_gb: Mapped[int] = mapped_column(
         Integer, default=1, nullable=False, comment="Maximum storage in GB"
     )
 
-    # Configuration & Settings
-    settings: Mapped[Optional[dict]] = mapped_column(
-        JSON, default=dict, nullable=True, comment="Organization configuration"
+    # Status & Lifecycle
+    is_active: Mapped[bool] = mapped_column(
+        Boolean, default=True, nullable=False, comment="Organization active status"
     )
 
-    features: Mapped[Optional[dict]] = mapped_column(
-        JSON, default=dict, nullable=True, comment="Enabled features and feature flags"
-    )
-
-    integrations: Mapped[Optional[dict]] = mapped_column(
-        JSON, default=dict, nullable=True, comment="External integrations configuration"
-    )
-
-    # Security
-    require_2fa: Mapped[bool] = mapped_column(
-        Boolean, default=False, nullable=False, comment="Require 2FA for all members"
-    )
-
-    public_projects: Mapped[bool] = mapped_column(
-        Boolean,
-        default=False,
-        nullable=False,
-        comment="Allow public project visibility",
-    )
-
-    # Soft Delete
     deleted_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
@@ -172,11 +162,13 @@ class Organization(Base):
     )
 
     # Relationships
-    members = relationship(
-        "OrganizationMember",
-        back_populates="organization",
+    user_roles = relationship(
+        "UserRole",
+        primaryjoin="and_(Organization.id == foreign(UserRole.resource_id), UserRole.resource_type == 'organization')",
         cascade="all, delete-orphan",
+        viewonly=True,
     )
+
     projects = relationship(
         "Project", back_populates="organization", cascade="all, delete-orphan"
     )
@@ -204,8 +196,8 @@ class Organization(Base):
 
     @property
     def current_members(self) -> int:
-        """Count active members"""
-        return len([m for m in self.members if m.status == MemberStatus.ACTIVE])
+        """Count active members using RBAC"""
+        return len([r for r in self.user_roles if r.is_active])
 
     @property
     def current_projects(self) -> int:
@@ -232,45 +224,6 @@ class Organization(Base):
             if self.max_storage_gb > 0
             else 0,
         }
-
-    @property
-    def is_over_limits(self) -> dict:
-        """Check if organization is over any limits"""
-        return {
-            "members": self.current_members >= self.max_members,
-            "projects": self.current_projects >= self.max_projects,
-            "storage": self.storage_used_mb >= (self.max_storage_gb * 1024),
-        }
-
-    @property
-    def public_url(self) -> str:
-        """Get public organization URL"""
-        return f"/org/{self.slug}"
-
-    @property
-    def display_avatar(self) -> Optional[str]:
-        """Get display avatar with fallbacks"""
-        return self.avatar_url or self.logo_url
-
-    def can_add_member(self) -> bool:
-        """Check if organization can add more members"""
-        return self.current_members < self.max_members
-
-    def can_create_project(self) -> bool:
-        """Check if organization can create more projects"""
-        return self.current_projects < self.max_projects
-
-    def has_feature(self, feature_name: str) -> bool:
-        """Check if organization has specific feature enabled"""
-        if not self.features:
-            return False
-        return self.features.get(feature_name, False)
-
-    def get_setting(self, setting_name: str, default=None):
-        """Get organization setting with default fallback"""
-        if not self.settings:
-            return default
-        return self.settings.get(setting_name, default)
 
     def __repr__(self) -> str:
         return f"<Organization(slug={self.slug}, name={self.name})>"
