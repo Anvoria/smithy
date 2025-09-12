@@ -1,3 +1,8 @@
+> [!WARNING]
+> I will be working less on this project because I simply don't have time, I'm working on a private project + school, but that doesn't mean I'm abandoning the project.
+
+---
+
 # Smithy
 
 ![Smithy Banner](.github/assets/banner.png)
